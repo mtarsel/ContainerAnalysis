@@ -60,7 +60,7 @@ def get_repo_pages(repo_count):
 		an image
 	"""
 	if repo_count <= 100:
-		print "\nTODO: only 1 page of repos!\n"
+		logging.critical('get_repo_pages(): only 1 page of repos (less than 100 repos)')
 		sys.exit()
 
 	repo_pages = int(repo_count / 100) # how many pages to query?
@@ -88,7 +88,7 @@ def get_images_from_repo(repo_pages, repo_count, regis, org, header):
 				print (j, image_name)
 			break #last page so no more repos.
 
-        #otherwise we have 100 images on this page for repo
+		#otherwise we have 100 images on this page for repo
 		for j in range(100):
 			image_name = data["results"][j]["name"]
 			print ("(dockerhub, %s, %s)"% (org, image_name))
