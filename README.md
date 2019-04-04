@@ -51,3 +51,6 @@ https://hub.docker.com/v2/repositories/ppc64le/ibmjava/tags/sdk/
 # Contributing
 
 [Read the guide here.](https://github.com/mtarsel/ContainerAnalysis/blob/master/docs/CONTRIBUTING.md)
+
+# License
+The Container Analysis Project uses the [Apache License Version 2.0](https://github.com/mtarsel/ContainerAnalysis/blob/master/docs/LICENSE) software license.
