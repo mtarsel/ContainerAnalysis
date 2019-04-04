@@ -75,6 +75,9 @@ def output_CSV(main_image, f):
 		f.write(',Images not parsed correctly from index.yaml\n')
 		return
 
+	#TODO if 'ppc64le' in main_image.keywords:
+	# 	print main_image.name + " contains ppc64le in the keywords in output_CSV()"
+
 	for image_obj in main_image.sub_images:
 		  
 		if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
@@ -155,7 +158,7 @@ def runit(app_list, hub_list):
 					if there is more than 100 tags than no data is stored. we
 					only need 1 container to get arch, we still get all the
 					data we want"""
-				
+
 				logging.warning('more than 100 tags. Querying several pages')
 				image_obj.get_alot_image_tag_names(regis)
 					#this function also gets arch for the image.
