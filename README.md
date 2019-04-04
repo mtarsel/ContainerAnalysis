@@ -12,7 +12,7 @@ pip install -r requirements.txt
 wget https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml
 python get-image-info.py index.yaml
 ```
-After execution is complete, you can view the results.csv file
+After execution is complete, you can view the [results.csv](https://github.com/mtarsel/ContainerAnalysis/blob/master/docs/results.pdf) file
 
 A new directory called Applications/ will exist with more info about the Applications and Images.
 
