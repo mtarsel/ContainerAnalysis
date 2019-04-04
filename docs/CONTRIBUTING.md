@@ -1,6 +1,8 @@
 ### Welcome
 
-Contributions are welcome to the Container Analysis Project in many forms, and there's always plenty to do!
+Contributions are welcome to the Container Analysis Project in many forms, and there's always plenty to do.
+
+Search in the code for any TODO and please contribute!
 
 ### Getting help
 
