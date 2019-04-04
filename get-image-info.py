@@ -38,9 +38,9 @@ def setup_logging():
 	parser.add_argument('-v', '--verbose',help="INFO logging enabled",
 					action="store_const", dest="loglevel", const=logging.INFO)
 
-		parser.add_argument('file', help="yaml file containing username/password and Image info", metavar='FILE.yaml')
+	parser.add_argument('file', help="yaml file containing username/password and Image info", metavar='FILE.yaml')
 		
-		args = parser.parse_args()
+	args = parser.parse_args()
 		
 	logging.getLogger("requests").setLevel(logging.WARNING) #turn off requests
 
@@ -70,56 +70,58 @@ def output_CSV(main_image, f):
 	"""
 
 	f.write('%s\n' %(main_image.name)) #just output this once
+
 	if len(main_image.images) != len(main_image.tags) or len(main_image.repos) != len(main_image.images):
 		f.write(',Images not parsed correctly from index.yaml\n')
 		return
+
 	for image_obj in main_image.sub_images:
 		  
-			if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
-				if image_obj.is_container == True:
-					f.write(',%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
-				else:
-					f.write(',%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
-
-			if image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
-				if image_obj.is_container == True:
-					f.write(',%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
-				else:
-					f.write(',%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
-
-			if image_obj.is_amd64 and not image_obj.is_ppc64le and image_obj.is_s390x:
-				if image_obj.is_container == True:
-					f.write(',%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
-				else:
-					f.write(',%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
-			
-			if image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
-				if image_obj.is_container == True:
-					f.write(',%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
-				else:
-					f.write(',%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
-
-			if not image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
-				if image_obj.is_container == True:
-					f.write(',%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
-				else:
-					f.write(',%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
-
-			
-			if not image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
-				if image_obj.is_container == True:
-					f.write(',%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
-				else:
-					f.write(',%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
-			 
-			if not image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
-				if image_obj.is_container == True:
-			f.write(',%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
-		else:
-			if image_obj.exist_in_repo == False:
-			f.write(',%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+		if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
+			if image_obj.is_container == True:
+				f.write(',%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
 			else:
-						f.write(',%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+				f.write(',%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
+
+		if image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
+			if image_obj.is_container == True:
+				f.write(',%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
+			else:
+				f.write(',%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
+	
+		if image_obj.is_amd64 and not image_obj.is_ppc64le and image_obj.is_s390x:
+			if image_obj.is_container == True:
+				f.write(',%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
+			else:
+				f.write(',%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
+			
+		if image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
+			if image_obj.is_container == True:
+				f.write(',%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
+			else:
+				f.write(',%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
+
+		if not image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
+			if image_obj.is_container == True:
+				f.write(',%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
+			else:
+				f.write(',%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
+
+			
+		if not image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
+			if image_obj.is_container == True:
+				f.write(',%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
+			else:
+				f.write(',%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
+			 
+		if not image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
+			if image_obj.is_container == True:
+				f.write(',%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
+			else:
+				if image_obj.exist_in_repo == False:
+					f.write(',%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+				else:
+					f.write(',%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
 def runit(app_list, hub_list):
 	"""This function will call output_CSV() for each App from the helm chart"""
@@ -153,6 +155,7 @@ def runit(app_list, hub_list):
 					if there is more than 100 tags than no data is stored. we
 					only need 1 container to get arch, we still get all the
 					data we want"""
+				
 				logging.warning('more than 100 tags. Querying several pages')
 				image_obj.get_alot_image_tag_names(regis)
 					#this function also gets arch for the image.
@@ -167,7 +170,6 @@ def runit(app_list, hub_list):
 				image_obj.is_container = True
 				#now the container is part of image_obj
 				image_obj.get_archs(regis, image_obj.container)
-
 
 			app_obj.sub_images.append(image_obj)
 			#From here, all the vars are set for the output.

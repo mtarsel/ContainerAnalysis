@@ -168,11 +168,11 @@ class Image:
 				self.add_arch(data["images"][arch_name]["architecture"])
 		
 				if 'ppc64le' in self.archs:
-			self.is_ppc64le = True
+					self.is_ppc64le = True
 				if 'amd64' in self.archs:
-			self.is_amd64 = True
+					self.is_amd64 = True
 				if 's390x' in self.archs:
-			self.is_s390x = True
+					self.is_s390x = True
 
 	def get_image_tag(self, regis, itr):
 		"""Get the image tag info. the request page contains all the info we
