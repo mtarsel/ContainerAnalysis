@@ -9,8 +9,7 @@ Tested with Python 2.7
 
 ```bash
 pip install -r requirements.txt
-wget https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml
-python get-image-info.py index.yaml
+python get-image-info.py 
 ```
 After execution is complete, you can view the [results.csv](https://github.com/mtarsel/ContainerAnalysis/blob/master/docs/results.pdf) file
 
