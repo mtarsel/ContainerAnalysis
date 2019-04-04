@@ -13,7 +13,7 @@ After execution is complete, you can view the Applications/
 
 Please note this script may not print out every result... or correctly. values.yaml are specific to each Application and so they are all written differently.
 
-## Specify Logging
+# Specify Logging
 
 By default, WARNING level logging is enabled. Otherwise run:
 
@@ -45,3 +45,7 @@ https://hub.docker.com/v2/repositories/ppc64le/elk/tags/?page_size=100
 This example is the most detailed information we can get for a specific image
 tag
 https://hub.docker.com/v2/repositories/ppc64le/ibmjava/tags/sdk/
+
+# Contributing
+
+[Read the guide here.](https://github.com/mtarsel/ContainerAnalysis/blob/master/docs/CONTRIBUTING.md)
