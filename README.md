@@ -1,4 +1,4 @@
-# The Container Analysis
+# The Container Analysis Project
 An application to gather information about images and containers on DockerHub.
 
 ## NOTE: currently only supports dockerhub repoistory
