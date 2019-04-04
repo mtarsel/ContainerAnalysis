@@ -74,12 +74,15 @@ def output_CSV(main_image, f):
 	if len(main_image.images) != len(main_image.tags) or len(main_image.repos) != len(main_image.images):
 		f.write(',Images not parsed correctly from index.yaml\n')
 		return
-
-	#TODO if 'ppc64le' in main_image.keywords:
-	# 	print main_image.name + " contains ppc64le in the keywords in output_CSV()"
+		
+	#TODO changing output to use keywords from App
+	#f.write("App, amd64, ppc64le, s390x,Images,Container,amd64,ppc64le,s390x,Container Exists?\n")
+	#TODO - no for loop so outputs only once
+	#if 'amd64' in main_image.keywords and 'ppc64le' in main_image.keywords and 's390x' in main_image.keywords:
+	# 	f.write('%s,Y,Y,Y\n' %(main_image.name)) 
 
 	for image_obj in main_image.sub_images:
-		  
+
 		if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
 			if image_obj.is_container == True:
 				f.write(',%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
@@ -250,12 +253,13 @@ def main():
 	# 	file_tmp = urllib.urlretrieve(url, filename=None)[0]
 	# 	with open(file_tmp, 'r') as input_file:
 	# 		index_yaml_doc = yaml.safe_load(input_file)
-
-	# if sys.argv[1] == "index.yaml":
 	# 	#if str(sys.argv[1]).endswith('.yaml'):
 	# 	print "yaml supplied"
 	# 	with open(sys.argv[1], 'r') as input_file:
 	# 		index_yaml_doc = yaml.safe_load(input_file)
+
+	#TODO difference between https://github.com/IBM/charts
+	# and https://github.ibm.com/IBMPrivateCloud/charts ?
 
 	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
 	file_tmp = urllib.urlretrieve(url, filename=None)[0]
