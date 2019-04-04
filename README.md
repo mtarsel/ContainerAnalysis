@@ -5,7 +5,10 @@ An application to gather information about images and containers on DockerHub an
  
 # How to Run it
 
+Tested with Python 2.7
+
 ```bash
+pip install -r requirements.txt
 wget https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml
 python get-image-info.py index.yaml
 ```
@@ -25,13 +28,6 @@ python get-image-info.py --help
 
 Output is saved to a file called container-output.log in same directory as [get-image-info.py](./get-image-info.py). 
 
-# Python Installation
-
-Tested with Python 2.7
-
-```bash
-pip install -r requirements.txt
-```
 
 # How To Gather Info on dockerhub.com
 
