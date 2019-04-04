@@ -38,7 +38,7 @@ def setup_logging():
 	parser.add_argument('-v', '--verbose',help="INFO logging enabled",
 					action="store_const", dest="loglevel", const=logging.INFO)
 
-	parser.add_argument('file', help="yaml file containing username/password and Image info", metavar='FILE.yaml')
+	parser.add_argument('file', nargs='?', help="yaml file containing username/password and Image info", metavar='FILE.yaml')
 		
 	args = parser.parse_args()
 		
@@ -243,19 +243,24 @@ def add_header_to_yaml():
 
 def main():
 
-	#first setup registries for url access
-	if ( len(sys.argv) <  2):
-		print "***ERROR: Please provide a single yaml file to parse!\n"
-		print "Usage:\n python get-image-info.py index.yaml"
-		sys.exit()
+	# TODO use argparse
+	# if index.yaml given, open it, otherwise download it
+	# if (len(sys.argv) < 2):
+	# 	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
+	# 	file_tmp = urllib.urlretrieve(url, filename=None)[0]
+	# 	with open(file_tmp, 'r') as input_file:
+	# 		index_yaml_doc = yaml.safe_load(input_file)
 
-	if (str(sys.argv[1]).endswith('.yaml')):
-		with open(sys.argv[1], 'r') as input_file:
-			index_yaml_doc = yaml.safe_load(input_file)
-	else:
-		print "***ERROR: Please provide a yaml file to parse!\n"
-		print "Usage:\n python get-image-info.py index.yaml"
-		sys.exit()
+	# if sys.argv[1] == "index.yaml":
+	# 	#if str(sys.argv[1]).endswith('.yaml'):
+	# 	print "yaml supplied"
+	# 	with open(sys.argv[1], 'r') as input_file:
+	# 		index_yaml_doc = yaml.safe_load(input_file)
+
+	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
+	file_tmp = urllib.urlretrieve(url, filename=None)[0]
+	with open(file_tmp, 'r') as input_file:
+		index_yaml_doc = yaml.safe_load(input_file)
 
 	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
