@@ -1,5 +1,5 @@
 # The Container Analysis Project
-An application to gather information about images and containers on DockerHub.
+An application to gather information about images and containers on DockerHub and output this helpful info into a CSV file.
 
 ## NOTE: currently only supports dockerhub repoistory
  
@@ -9,7 +9,9 @@ An application to gather information about images and containers on DockerHub.
 wget https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml
 python get-image-info.py index.yaml
 ```
-After execution is complete, you can view the Applications/
+After execution is complete, you can view the results.csv file
+
+A new directory called Applications/ will exist with more info about the Applications and Images.
 
 Please note this script may not print out every result... or correctly. values.yaml are specific to each Application and so they are all written differently.
 
