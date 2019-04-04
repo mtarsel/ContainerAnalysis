@@ -32,16 +32,16 @@ def setup_logging():
 
 	parser.add_argument('-d', '--debug',
 						help="DEBUG output enabled. Logs a lot of stuff",
-                    	action="store_const", dest="loglevel",
+						action="store_const", dest="loglevel",
 						const=logging.DEBUG, default=logging.WARNING)
 
 	parser.add_argument('-v', '--verbose',help="INFO logging enabled",
 					action="store_const", dest="loglevel", const=logging.INFO)
 
-        parser.add_argument('file', help="yaml file containing username/password and Image info", metavar='FILE.yaml')
-        
-        args = parser.parse_args()
-        
+		parser.add_argument('file', help="yaml file containing username/password and Image info", metavar='FILE.yaml')
+		
+		args = parser.parse_args()
+		
 	logging.getLogger("requests").setLevel(logging.WARNING) #turn off requests
 
 	# let argparse do the work for us
@@ -74,52 +74,52 @@ def output_CSV(main_image, f):
 		f.write(',Images not parsed correctly from index.yaml\n')
 		return
 	for image_obj in main_image.sub_images:
-          
-            if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
-                if image_obj.is_container == True:
-                    f.write(',%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
-                else:
-                    f.write(',%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
+		  
+			if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
+				if image_obj.is_container == True:
+					f.write(',%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
+				else:
+					f.write(',%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
 
-            if image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
-                if image_obj.is_container == True:
-                    f.write(',%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
-                else:
-                    f.write(',%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
+			if image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
+				if image_obj.is_container == True:
+					f.write(',%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
+				else:
+					f.write(',%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
 
-            if image_obj.is_amd64 and not image_obj.is_ppc64le and image_obj.is_s390x:
-                if image_obj.is_container == True:
-                    f.write(',%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
-                else:
-                    f.write(',%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
-            
-            if image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
-                if image_obj.is_container == True:
-                    f.write(',%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
-                else:
-                    f.write(',%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
+			if image_obj.is_amd64 and not image_obj.is_ppc64le and image_obj.is_s390x:
+				if image_obj.is_container == True:
+					f.write(',%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
+				else:
+					f.write(',%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
+			
+			if image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
+				if image_obj.is_container == True:
+					f.write(',%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
+				else:
+					f.write(',%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
 
-            if not image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
-                if image_obj.is_container == True:
-                    f.write(',%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
-                else:
-                    f.write(',%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
+			if not image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
+				if image_obj.is_container == True:
+					f.write(',%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
+				else:
+					f.write(',%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
 
-            
-            if not image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
-                if image_obj.is_container == True:
-                    f.write(',%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
-                else:
-                    f.write(',%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
-             
-            if not image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
-                if image_obj.is_container == True:
-		    f.write(',%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
+			
+			if not image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
+				if image_obj.is_container == True:
+					f.write(',%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
+				else:
+					f.write(',%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
+			 
+			if not image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
+				if image_obj.is_container == True:
+			f.write(',%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
 		else:
-		    if image_obj.exist_in_repo == False:
+			if image_obj.exist_in_repo == False:
 			f.write(',%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
-		    else:
-                        f.write(',%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+			else:
+						f.write(',%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
 def runit(app_list, hub_list):
 	"""This function will call output_CSV() for each App from the helm chart"""
@@ -131,12 +131,11 @@ def runit(app_list, hub_list):
 		for i in range(len(app_obj.images)):
 
 			if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
-				#print "This image was not parsed correctly from index.yaml"
+				logging.warning('%s contains a weird image from index.yaml', app_obj.name)
 				break
 			
-			#TODO logging	
-			#final_repo = 'hub.docker.com/' + app_obj.clean_repos[i] + '/' + str(app_obj.tags[i])
-			#print(app_obj.name + '  '+ str(app_obj.images[i]) + ': ' + final_repo + '\n')
+			final_repo = 'hub.docker.com/' + app_obj.clean_repos[i] + '/' + str(app_obj.tags[i])
+			logging.warning('%s: %s  %s ', app_obj.name, str(app_obj.images[i]), final_repo)
 		
 			image_obj = Image(app_obj.images[i], app_obj.clean_repos[i], str(app_obj.tags[i])) #init image object with name
 			regis = 'hub.docker.com/' #TODO - add more repos
@@ -164,14 +163,9 @@ def runit(app_list, hub_list):
 				# also gets arch for the image.
 				image_obj.get_image_tag_names(regis)
 
-			#no longer allowing user input in this mode so cannot, get the regex * as container
-			# if container == '*':
-			# 	if image_obj.num_tags > 0:
-			# 		image_obj.is_container = True
-
 			if image_obj.container in image_obj.tags:
 				image_obj.is_container = True
-				#TODO container now part of image_obj
+				#now the container is part of image_obj
 				image_obj.get_archs(regis, image_obj.container)
 
 
@@ -196,26 +190,26 @@ def mkdir_p(path):
 			raise
 
 def parse_index_yaml(yaml_doc):
-	"""parse index.yaml from helm chart in order to not use input.yaml"""
-	#see TODO below main_image_list = [ ]
+	"""parse index.yaml (the helm chart) and initalize the App object"""
 
 	app_list = [ ]
    
-    #keys = MainImage.name, values=url where a tgz file contains values.yaml
+	#keys = MainImage.name, values=url where a tgz file contains values.yaml
 	for k, v in yaml_doc["entries"].iteritems():
-		app_name = k # MainImage.name
+		app_name = k 
 		url_for_app = ''.join(v[0]['urls']) #returns a list with only 1 element = url str
 		
 		main_image = App(app_name, str(url_for_app))
 		
+		#TODO using black list from utils/indexparser.py
 		if main_image.name not in black_list:
- 			mkdir_p(str(os.getcwd() + "/Applications/" + main_image.name)) #Create the Applications/app_name dir
- 			get_tarfile(main_image) #Download tarballs and start parsing
+			mkdir_p(str(os.getcwd() + "/Applications/" + main_image.name)) #Create the Applications/app_name dir
+			get_tarfile(main_image) #Download tarballs and start parsing
 
- 		#LOGGING print main_image.name + " with " + str(len(main_image.images))
- 		app_list.append(main_image)
+		logging.info('app: %s has %s images', main_image.name, str(len(main_image.images)))
+		app_list.append(main_image)
 
- 	return app_list
+	return app_list
 
 def add_header_to_yaml():
 	"""add creds and proper formatting to yaml so we can runit"""
@@ -262,11 +256,11 @@ def main():
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""
-  	if logging.getLogger().level == logging.DEBUG:
+	if logging.getLogger().level == logging.DEBUG:
 		if os.path.exists("generated_input.yaml") is True:
 			os.remove("generated_input.yaml")
 
-		#TODO how to handle repo user/passwords?
+		#TODO how to handle repo different user/passwords?
 		yaml_doc = add_header_to_yaml() # add creds to top of yaml file
 
 		with open(yaml_doc, 'r') as input_file:
@@ -283,7 +277,7 @@ def main():
 
 	hub_list = get_registries(yaml_doc)
 	"""create a Hub object containing url and creds. return a list of
-    objects"""
+	objects"""
 
 	runit(app_list, hub_list) # does not read generated_input.yaml - uses App object
 	"""needs list of hubs (registries) to create special header per each
