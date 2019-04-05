@@ -260,15 +260,6 @@ def main():
 
 	# TODO use argparse
 	# if index.yaml given, open it, otherwise download it
-	# if (len(sys.argv) < 2):
-	# 	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
-	# 	file_tmp = urllib.urlretrieve(url, filename=None)[0]
-	# 	with open(file_tmp, 'r') as input_file:
-	# 		index_yaml_doc = yaml.safe_load(input_file)
-	# 	#if str(sys.argv[1]).endswith('.yaml'):
-	# 	print "yaml supplied"
-	# 	with open(sys.argv[1], 'r') as input_file:
-	# 		index_yaml_doc = yaml.safe_load(input_file)
 
 	#TODO difference between https://github.com/IBM/charts
 	# and https://github.ibm.com/IBMPrivateCloud/charts ?
