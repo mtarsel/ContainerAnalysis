@@ -62,6 +62,37 @@ def get_registries(yaml_doc):
 			hub_list.append(hub)
 	return hub_list
 
+def output_app_keywords(main_image, f):
+	""" use keywords from App. no for loop so outputs only once"""
+
+	if 'amd64' in main_image.keywords and 'ppc64le' in main_image.keywords and 's390x' in main_image.keywords:
+		f.write('%s,Y,Y,Y\n' %(main_image.name)) 
+		return
+
+	if 'amd64' in main_image.keywords and 'ppc64le' in main_image.keywords:
+		f.write('%s,Y,Y,N\n' %(main_image.name)) 
+		return
+	
+	if 'amd64' in main_image.keywords and 's390x' in main_image.keywords:
+		f.write('%s,Y,N,Y\n' %(main_image.name))
+		return
+
+	if 'ppc64le' in main_image.keywords and 's390x' in main_image.keywords:
+		f.write('%s,N,Y,Y\n' %(main_image.name))
+		return
+
+	if 'amd64' in main_image.keywords:
+		f.write('%s,Y,N,N\n' %(main_image.name))
+		return
+
+	if 'ppc64le' in main_image.keywords:
+		f.write('%s,N,Y,N\n' %(main_image.name))
+		return
+
+	if 's390x' in main_image.keywords:
+		f.write('%s,N,N,Y\n' %(main_image.name))
+		return
+
 def output_CSV(main_image, f):
 	"""from a list of images in the App, determine if all the images are supported/
 	If all the images are supported then do not output anything.
@@ -69,71 +100,65 @@ def output_CSV(main_image, f):
 	This will return to runit() and do it again for another main image
 	"""
 
-	f.write('%s\n' %(main_image.name)) #just output this once
+	output_app_keywords(main_image, f)
 
 	if len(main_image.images) != len(main_image.tags) or len(main_image.repos) != len(main_image.images):
-		f.write(',Images not parsed correctly from index.yaml\n')
+		f.write(',,,,Images not parsed correctly from index.yaml\n')
 		return
-		
-	#TODO changing output to use keywords from App
-	#f.write("App, amd64, ppc64le, s390x,Images,Container,amd64,ppc64le,s390x,Container Exists?\n")
-	#TODO - no for loop so outputs only once
-	#if 'amd64' in main_image.keywords and 'ppc64le' in main_image.keywords and 's390x' in main_image.keywords:
-	# 	f.write('%s,Y,Y,Y\n' %(main_image.name)) 
 
 	for image_obj in main_image.sub_images:
 
 		if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
 
 		if image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
 	
 		if image_obj.is_amd64 and not image_obj.is_ppc64le and image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
 			
 		if image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
 
 		if not image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
 
 			
 		if not image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
 			 
 		if not image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
 				if image_obj.exist_in_repo == False:
-					f.write(',%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+					f.write(',,,,%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 				else:
-					f.write(',%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
 def runit(app_list, hub_list):
 	"""This function will call output_CSV() for each App from the helm chart"""
 
 	f = open("results.csv", "a+")
-	f.write("App,Images,Container,amd64,ppc64le,s390x,Container Exists?\n")
+	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 
 	for app_obj in app_list:
 		for i in range(len(app_obj.images)):
