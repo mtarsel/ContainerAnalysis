@@ -18,6 +18,18 @@ black_list = [
 		"ibm-cem",
 		"ibm-ace-server-dev"] 
 
+def mkdir_p(path):
+	"""Allow us to make sub dirs, just like mkdir -p
+	This is used to move the files from the Application tarball into the permanet 
+	Applications dir in the root of the project's dir. Why you ask? For debuggin of course!"""
+	try:
+		os.makedirs(path)
+	except OSError as exc:  # Python >2.5
+		if exc.errno == errno.EEXIST and os.path.isdir(path):
+			pass
+		else:
+			raise
+
 def generate_output(app_obj):
 	"""writes to a 'yaml' file using some space and colons."""
 
