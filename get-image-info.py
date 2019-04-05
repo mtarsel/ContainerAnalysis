@@ -12,7 +12,7 @@ from objects.image import Image
 from objects.image import App
 from utils.indexparser import *
 
-#NEVER CALLED
+#NEVER CALLED - can be helpful in teh future to see what the JSON object looks like
 def pp_json(json_thing, sort=True, indents=4):
 	""" Nicely print out a JSON string with indents."""
 	#pprint(vars(your_object)) #a way to print out all attr in obj

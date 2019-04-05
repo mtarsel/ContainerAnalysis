@@ -7,7 +7,7 @@ import shutil
 import logging
 from nested_lookup import nested_lookup
 
-#NOTE dont work
+#TODO: these apps dont work!
 black_list = [
 		"ibm-blockchain-platform-remote-peer",
 		"ibm-icpmonitoring",
