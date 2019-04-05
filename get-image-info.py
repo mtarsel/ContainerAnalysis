@@ -1,11 +1,9 @@
 """ Written by Mick Tarsel"""
 import sys
 import requests
-import json
 import logging
 import argparse
 import yaml
-import tarfile
 import errno
 import shutil
 from urllib import urlretrieve
@@ -18,6 +16,7 @@ from utils.indexparser import *
 def pp_json(json_thing, sort=True, indents=4):
 	""" Nicely print out a JSON string with indents."""
 	#pprint(vars(your_object)) #a way to print out all attr in obj
+	#import json
 	if type(json_thing) is str:
 		print(json.dumps(json.loads(json_thing), sort_keys=sort, indent=indents))
 	else:
@@ -209,18 +208,6 @@ def runit(app_list, hub_list):
 		#After creating a list of all the subimages in mainImage, output it
 		output_CSV(app_obj, f)
 	f.close() #close csv file
-
-def mkdir_p(path):
-	"""Allow us to make sub dirs, just like mkdir -p
-	This is used to move the files from the Application tarball into the permanet 
-	Applications dir in the root of the project's dir. Why you ask? For debuggin of course!"""
-	try:
-		os.makedirs(path)
-	except OSError as exc:  # Python >2.5
-		if exc.errno == errno.EEXIST and os.path.isdir(path):
-			pass
-		else:
-			raise
 
 def parse_index_yaml(yaml_doc):
 	"""parse index.yaml (the helm chart) and initalize the App object"""
