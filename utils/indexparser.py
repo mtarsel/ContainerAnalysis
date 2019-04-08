@@ -12,6 +12,7 @@ black_list = [
 		"ibm-blockchain-platform-remote-peer",
 		"ibm-icpmonitoring",
 		"ibm-webterminal-dev",
+                "ibm-postgres-dev",
 		"ibm-icplogging-kibana",
 		"ibm-icplogging",
 		"ibm-ace-dashboard-dev",
