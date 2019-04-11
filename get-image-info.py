@@ -101,7 +101,7 @@ def output_CSV(main_image, f):
 
 	output_app_keywords(main_image, f)
 
-	if len(main_image.images) != len(main_image.tags) or len(main_image.repos) != len(main_image.images):
+	if main_image.is_bad == True:
 		f.write(',,,,Images not parsed correctly from index.yaml\n')
 		return
 
@@ -148,7 +148,7 @@ def output_CSV(main_image, f):
 			if image_obj.is_container == True:
 				f.write(',,,,%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				if image_obj.exist_in_repo == False:
+				if image_obj.exist_in_repo == False: #TODO could use app.is_bad??
 					f.write(',,,,%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
@@ -157,7 +157,8 @@ def runit(app_list, hub_list, bad_app_list):
 	"""This function will call output_CSV() for each App from the helm chart"""
 
 	f = open("results.csv", "a+")
-	f.write("Apps with errors: %s Total Apps: %s \n" %(str(len(bad_app_list)), str(len(app_list))))
+	f.write("Errors: %s Printed: %s Total: %s \n" %(str(len(bad_app_list)),
+		str(len(app_list) - len(bad_app_list)), str(len(app_list))))
 	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 
 	for app_obj in app_list:
@@ -267,9 +268,15 @@ def verify_apps(app_list):
 		if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
 			app_obj.is_bad = True
 			bad_app_list.append(app_obj)
+		
 		if app_obj.name in black_list:
 			app_obj.is_bad = True
 			bad_app_list.append(app_obj)
+
+		#TODO could iterate thru images in app and set the app.is_bad var based on image info		
+		# if image_obj.exist_in_repo == False:
+		# 	app_obj.is_bad = True
+		# 	bad_app_list.append(app_obj)
 
 	return bad_app_list
 
@@ -316,6 +323,8 @@ def main():
 	"""needs list of hubs (registries) to create special header per each
 	image. creates Image objects from images in App. writes to csv 
 	file via output_CSV() """
+
+	#TODO - output names of bad apps at end of log
 
 
 if __name__ == "__main__":
