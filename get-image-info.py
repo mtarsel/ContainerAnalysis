@@ -153,16 +153,17 @@ def output_CSV(main_image, f):
 				else:
 					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
-def runit(app_list, hub_list):
+def runit(app_list, hub_list, bad_app_list):
 	"""This function will call output_CSV() for each App from the helm chart"""
 
 	f = open("results.csv", "a+")
+	f.write("Apps with errors: %s Total Apps: %s \n" %(str(len(bad_app_list)), str(len(app_list))))
 	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 
 	for app_obj in app_list:
 		for i in range(len(app_obj.images)):
 
-			if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
+			if app_obj.is_bad == True:
 				logging.warning('%s contains a weird image from index.yaml', app_obj.name)
 				break
 			
@@ -256,13 +257,26 @@ def add_header_to_yaml():
 
 	return generated_input
 
+def verify_apps(app_list):
+	"""take the entire list of apps and if its in black_list or
+	if something doesn't seem right, let it be known"""
+
+	bad_app_list = [ ]
+
+	for app_obj in app_list:
+		if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
+			app_obj.is_bad = True
+			bad_app_list.append(app_obj)
+		if app_obj.name in black_list:
+			app_obj.is_bad = True
+			bad_app_list.append(app_obj)
+
+	return bad_app_list
+
 def main():
 
 	# TODO use argparse
 	# if index.yaml given, open it, otherwise download it
-
-	#TODO difference between https://github.com/IBM/charts
-	# and https://github.ibm.com/IBMPrivateCloud/charts ?
 
 	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
 	file_tmp = urllib.urlretrieve(url, filename=None)[0]
@@ -290,13 +304,15 @@ def main():
 	app_list = parse_index_yaml(index_yaml_doc)
 	#returns generated_input.yaml and all the info we need to crawl
 
+	bad_app_list = verify_apps(app_list) # something didnt parse correctly
+
 	yaml_doc = add_header_to_yaml() # add creds to top of yaml file
 
 	hub_list = get_registries(yaml_doc)
 	"""create a Hub object containing url and creds. return a list of
 	objects"""
 
-	runit(app_list, hub_list) # does not read generated_input.yaml - uses App object
+	runit(app_list, hub_list, bad_app_list) # does not read generated_input.yaml - uses App object
 	"""needs list of hubs (registries) to create special header per each
 	image. creates Image objects from images in App. writes to csv 
 	file via output_CSV() """

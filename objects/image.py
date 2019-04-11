@@ -24,6 +24,7 @@ class App:
 		self.clean_repos = [ ] #sanitized
 		self.values_exists = False
 		self.Charts_exists = False
+		self.is_bad = False # something did't parse correctly so its causing problems
 
 
 	def add_keyword(self, keyword):
