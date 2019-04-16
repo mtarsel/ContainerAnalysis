@@ -12,7 +12,7 @@ from objects.image import Image
 from objects.image import App
 from utils.indexparser import *
 
-#NEVER CALLED - can be helpful in teh future to see what the JSON object looks like
+#NEVER CALLED - can be helpful in the future to see what the JSON object looks like
 def pp_json(json_thing, sort=True, indents=4):
 	""" Nicely print out a JSON string with indents."""
 	#pprint(vars(your_object)) #a way to print out all attr in obj
@@ -180,7 +180,7 @@ def runit(app_list, hub_list):
 	for app_obj in app_list:
 
 		print app_obj.name
-		app_obj.verify(black_list)  # do a quick check to make sure it parsed correctly
+		app_obj.verify(black_list) #make sure app and images have all the info
 
 		for i in range(len(app_obj.images)):
 
@@ -197,8 +197,6 @@ def runit(app_list, hub_list):
 
 			if name in ppc64_list:
 				org = "ppc64le"
-			else:
-				org = "ibmcom" # a way to sanitize the org/repo
 
 			image_obj = Image(name, org, container)
 			regis = 'hub.docker.com/' #TODO - add more repos

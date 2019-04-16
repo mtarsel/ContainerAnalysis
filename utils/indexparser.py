@@ -18,9 +18,8 @@ black_list = [
 		"ibm-ace-dashboard-dev",
 		"ibm-cem",
 		"ibm-ace-server-dev",
-		#"ibm-microclimate",
-		"ibm-eventstreams-dev", #same error as above but I dont see a list of containers
-		"ibm-spectrum-conductor"] #same as above
+		"ibm-eventstreams-dev", 
+		"ibm-spectrum-conductor"]
 
 def mkdir_p(path):
 	"""Allow us to make sub dirs, just like mkdir -p
