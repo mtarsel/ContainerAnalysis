@@ -74,7 +74,7 @@ class Image:
 			logging.critical('image: %s does not exist in %s organization',
 							self.name, self.org)
 			logging.critical(image_url)
-			#find_image(self, regis)# image is not in this org. big problem!!!
+			#TODO find_image(self, regis)# image is not in this org. big problem!!!
 			self.is_container = False
 			self.is_multiarch = False
 			self.is_ppc64le = False

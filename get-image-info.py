@@ -149,12 +149,30 @@ def output_CSV(main_image, f):
 				f.write(',,,,%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
 				if image_obj.exist_in_repo == False: #TODO could use app.is_bad??
+					main_image.is_bad = True
 					f.write(',,,,%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
 def runit(app_list, hub_list, bad_app_list):
 	"""This function will call output_CSV() for each App from the helm chart"""
+
+	# this list should remove all the NOT FOUND IN REPO erros
+	ppc64_list = [ 
+		"rabbitmq",
+		"open-liberty",
+		"couchdb",
+		"cassandra",
+		"websphere-liberty",
+		"nginx"
+	] 
+
+	#TODO not used yet but may be helpful later
+	ibmcorp_list = [
+		"ibmcorp/isam",
+		"ibmcorp/db2_developer_c",
+		"ibmcorp/db2_developer_c"
+	]
 
 	f = open("results.csv", "a+")
 	f.write("Errors: %s Printed: %s Total: %s \n" %(str(len(bad_app_list)),
@@ -171,7 +189,14 @@ def runit(app_list, hub_list, bad_app_list):
 			final_repo = 'hub.docker.com/' + app_obj.clean_repos[i] + '/' + str(app_obj.tags[i])
 			logging.warning('%s: %s  %s ', app_obj.name, str(app_obj.images[i]), final_repo)
 		
-			image_obj = Image(app_obj.images[i], app_obj.clean_repos[i], str(app_obj.tags[i])) #init image object with name
+			name = app_obj.images[i]
+			org = app_obj.clean_repos[i]
+			container = str(app_obj.tags[i])
+
+			if name in ppc64_list :
+				org = "ppc64le"
+
+			image_obj = Image(name, org, container)
 			regis = 'hub.docker.com/' #TODO - add more repos
 
 			for obj in hub_list: #only authorize the regis for the image we want
@@ -325,7 +350,12 @@ def main():
 	file via output_CSV() """
 
 	#TODO - output names of bad apps at end of log
-
+	i = 0
+	for app in app_list:
+		if app.is_bad == True:
+			i = i + 1
+			print app.name
+	print i
 
 if __name__ == "__main__":
 	setup_logging()
