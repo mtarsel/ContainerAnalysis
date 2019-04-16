@@ -9,15 +9,15 @@ from nested_lookup import nested_lookup
 
 #TODO: these apps dont work!
 black_list = [
+		"ibm-postgres-dev",
 		"ibm-blockchain-platform-remote-peer",
 		"ibm-icpmonitoring",
 		"ibm-webterminal-dev",
-		"ibm-postgres-dev",
 		"ibm-icplogging-kibana",
 		"ibm-icplogging",
 		"ibm-ace-dashboard-dev",
-		"ibm-cem",
 		"ibm-ace-server-dev",
+		"ibm-cem",
 		"ibm-eventstreams-dev", 
 		"ibm-spectrum-conductor"]
 
