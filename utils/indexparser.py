@@ -12,12 +12,16 @@ black_list = [
 		"ibm-blockchain-platform-remote-peer",
 		"ibm-icpmonitoring",
 		"ibm-webterminal-dev",
-                "ibm-postgres-dev",
+		"ibm-postgres-dev",
 		"ibm-icplogging-kibana",
 		"ibm-icplogging",
 		"ibm-ace-dashboard-dev",
 		"ibm-cem",
-		"ibm-ace-server-dev"] 
+		"ibm-ace-server-dev",
+		"ibm-microclimate",# IndexError: list index out of range
+		# WARNING:ibm-microclimate: jenkins  hub.docker.com/jenkins/['lts', '3.10-1'] 
+		"ibm-eventstreams-dev", #same error as above but I dont see a list of containers
+		"ibm-spectrum-conductor"] #same as above
 
 def mkdir_p(path):
 	"""Allow us to make sub dirs, just like mkdir -p

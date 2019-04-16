@@ -154,10 +154,10 @@ def output_CSV(main_image, f):
 				else:
 					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
-def runit(app_list, hub_list, bad_app_list):
+def runit(app_list, hub_list):
 	"""This function will call output_CSV() for each App from the helm chart"""
 
-	# this list should remove all the NOT FOUND IN REPO erros
+	# this list contains apps which repo/org is ppc64le and not ibmcom
 	ppc64_list = [ 
 		"rabbitmq",
 		"open-liberty",
@@ -165,7 +165,7 @@ def runit(app_list, hub_list, bad_app_list):
 		"cassandra",
 		"websphere-liberty",
 		"nginx"
-	] 
+	] #TODO could utilize find_image()
 
 	#TODO not used yet but may be helpful later
 	ibmcorp_list = [
@@ -178,20 +178,21 @@ def runit(app_list, hub_list, bad_app_list):
 	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 
 	for app_obj in app_list:
+		print app_obj.name
 		for i in range(len(app_obj.images)):
 
 			if app_obj.is_bad == True:
 				logging.warning('%s contains a weird image from index.yaml', app_obj.name)
 				break
 			
-			final_repo = 'hub.docker.com/' + app_obj.clean_repos[i] + '/' + str(app_obj.tags[i])
+			final_repo = 'hub.docker.com/' + str(app_obj.clean_repos[i]) + '/' + str(app_obj.tags[i])
 			logging.warning('%s: %s  %s ', app_obj.name, str(app_obj.images[i]), final_repo)
 		
 			name = app_obj.images[i]
 			org = app_obj.clean_repos[i]
 			container = str(app_obj.tags[i])
 
-			if name in ppc64_list :
+			if name in ppc64_list:
 				org = "ppc64le"
 
 			image_obj = Image(name, org, container)
@@ -230,8 +231,8 @@ def runit(app_list, hub_list, bad_app_list):
 			#From here, all the vars are set for the output.
 
 		# end for loop for sub images of main_image
-		#After creating a list of all the subimages in mainImage, output it
-		output_CSV(app_obj, f)
+		verify_app(app_obj) # do a quick check to make sure it parsed correctly
+		output_CSV(app_obj, f) # After creating a list of all the subimages in mainImage, output it
 	f.close() #close csv file
 
 def parse_index_yaml(yaml_doc):
@@ -281,27 +282,23 @@ def add_header_to_yaml():
 
 	return generated_input
 
-def verify_apps(app_list):
+def verify_app(app_obj):
 	"""take the entire list of apps and if its in black_list or
 	if something doesn't seem right, let it be known"""
 
-	bad_app_list = [ ]
-
-	for app_obj in app_list:
-		if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
-			app_obj.is_bad = True
-			bad_app_list.append(app_obj)
+	if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
+		app_obj.is_bad = True
 		
-		if app_obj.name in black_list:
-			app_obj.is_bad = True
-			bad_app_list.append(app_obj)
+	if app_obj.name in black_list:
+		app_obj.is_bad = True
 
-		#TODO could iterate thru images in app and set the app.is_bad var based on image info		
-		# if image_obj.exist_in_repo == False:
-		# 	app_obj.is_bad = True
-		# 	bad_app_list.append(app_obj)
+	for image_obj in app_obj.sub_images:
+		#iterate thru images in app and set the app.is_bad var based on image info		
+		if image_obj.exist_in_repo == False:
+		 	app_obj.is_bad = True
 
-	return bad_app_list
+	if app_obj.is_bad == True:
+		print "its a bad one!\n"
 
 def main():
 
@@ -334,20 +331,19 @@ def main():
 	app_list = parse_index_yaml(index_yaml_doc)
 	#returns generated_input.yaml and all the info we need to crawl
 
-	bad_app_list = verify_apps(app_list) # something didnt parse correctly
-
 	yaml_doc = add_header_to_yaml() # add creds to top of yaml file
 
 	hub_list = get_registries(yaml_doc)
 	"""create a Hub object containing url and creds. return a list of
 	objects"""
 
-	runit(app_list, hub_list, bad_app_list) # does not read generated_input.yaml - uses App object
+	runit(app_list, hub_list) # does not read generated_input.yaml - uses App object
 	"""needs list of hubs (registries) to create special header per each
 	image. creates Image objects from images in App. writes to csv 
 	file via output_CSV() """
 
 	#TODO - output names of bad apps at end of log
+	print "\n========\n"
 	i = 0
 	for app in app_list:
 		if app.is_bad == True:
