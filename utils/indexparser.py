@@ -18,8 +18,7 @@ black_list = [
 		"ibm-ace-dashboard-dev",
 		"ibm-cem",
 		"ibm-ace-server-dev",
-		"ibm-microclimate",# IndexError: list index out of range
-		# WARNING:ibm-microclimate: jenkins  hub.docker.com/jenkins/['lts', '3.10-1'] 
+		#"ibm-microclimate",
 		"ibm-eventstreams-dev", #same error as above but I dont see a list of containers
 		"ibm-spectrum-conductor"] #same as above
 

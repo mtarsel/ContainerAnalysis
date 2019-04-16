@@ -178,7 +178,10 @@ def runit(app_list, hub_list):
 	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 
 	for app_obj in app_list:
+
 		print app_obj.name
+		app_obj.verify(black_list)  # do a quick check to make sure it parsed correctly
+
 		for i in range(len(app_obj.images)):
 
 			if app_obj.is_bad == True:
@@ -194,6 +197,8 @@ def runit(app_list, hub_list):
 
 			if name in ppc64_list:
 				org = "ppc64le"
+			else:
+				org = "ibmcom" # a way to sanitize the org/repo
 
 			image_obj = Image(name, org, container)
 			regis = 'hub.docker.com/' #TODO - add more repos
@@ -231,7 +236,6 @@ def runit(app_list, hub_list):
 			#From here, all the vars are set for the output.
 
 		# end for loop for sub images of main_image
-		verify_app(app_obj) # do a quick check to make sure it parsed correctly
 		output_CSV(app_obj, f) # After creating a list of all the subimages in mainImage, output it
 	f.close() #close csv file
 
@@ -281,24 +285,6 @@ def add_header_to_yaml():
 	f.close()
 
 	return generated_input
-
-def verify_app(app_obj):
-	"""take the entire list of apps and if its in black_list or
-	if something doesn't seem right, let it be known"""
-
-	if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
-		app_obj.is_bad = True
-		
-	if app_obj.name in black_list:
-		app_obj.is_bad = True
-
-	for image_obj in app_obj.sub_images:
-		#iterate thru images in app and set the app.is_bad var based on image info		
-		if image_obj.exist_in_repo == False:
-		 	app_obj.is_bad = True
-
-	if app_obj.is_bad == True:
-		print "its a bad one!\n"
 
 def main():
 

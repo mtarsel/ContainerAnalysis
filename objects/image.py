@@ -30,6 +30,21 @@ class App:
 	def add_keyword(self, keyword):
 		self.keywords.append(keyword)
 
+	def verify(self, black_list):
+		"""iterate thru an App's sub images to make sure we have all the info we need.
+		if something doesn't seem right, let it be known"""
+
+		if len(self.images) != len(self.tags) or len(self.repos) != len(self.images):
+			self.is_bad = True
+		
+		if self.name in black_list:
+			self.is_bad = True
+
+		for image_obj in self.sub_images:
+			#iterate thru images in app and set the app.is_bad var based on image info		
+			if image_obj.exist_in_repo == False:
+		 		self.is_bad = True
+
 class Image:
 	""" This is the object containing all the information we care about.
 		Eventually all the attributes will contain everything we need
