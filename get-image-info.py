@@ -175,8 +175,6 @@ def runit(app_list, hub_list, bad_app_list):
 	]
 
 	f = open("results.csv", "a+")
-	f.write("Errors: %s Printed: %s Total: %s \n" %(str(len(bad_app_list)),
-		str(len(app_list) - len(bad_app_list)), str(len(app_list))))
 	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 
 	for app_obj in app_list:
