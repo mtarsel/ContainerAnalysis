@@ -179,7 +179,6 @@ def runit(app_list, hub_list):
 
 	for app_obj in app_list:
 
-		print app_obj.name
 		app_obj.verify(black_list) #make sure app and images have all the info
 
 		for i in range(len(app_obj.images)):

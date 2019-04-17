@@ -15,7 +15,7 @@ black_list = [
 		"ibm-webterminal-dev",
 		"ibm-icplogging-kibana",
 		"ibm-icplogging",
-		"ibm-ace-dashboard-dev",
+		#"ibm-ace-dashboard-dev",
 		"ibm-ace-server-dev",
 		"ibm-cem",
 		"ibm-eventstreams-dev", 
