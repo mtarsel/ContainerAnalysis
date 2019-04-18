@@ -186,16 +186,22 @@ def runit(app_list, hub_list):
 			if app_obj.is_bad == True:
 				logging.warning('%s contains a weird image from index.yaml', app_obj.name)
 				break
-			
-			final_repo = 'hub.docker.com/' + str(app_obj.clean_repos[i]) + '/' + str(app_obj.tags[i])
-			logging.warning('%s: %s  %s ', app_obj.name, str(app_obj.images[i]), final_repo)
 		
-			name = app_obj.images[i]
-			org = app_obj.clean_repos[i]
+			name = str(app_obj.images[i])
+			org = str(app_obj.clean_repos[i])
 			container = str(app_obj.tags[i])
+
+			if app_obj.name == "ibm-ace-dashboard-dev":
+				#TODO ace-content-server, ace-dashboard, ace-icp-configurator
+				org = "ibmcom"
+				container = "11.0.0.3"
 
 			if name in ppc64_list:
 				org = "ppc64le"
+
+			final_repo = 'hub.docker.com/' + org + '/' + container
+			print final_repo
+			logging.warning('%s: %s  %s ', app_obj.name, name, final_repo)
 
 			image_obj = Image(name, org, container)
 			regis = 'hub.docker.com/' #TODO - add more repos
