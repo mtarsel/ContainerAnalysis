@@ -10,12 +10,11 @@ from nested_lookup import nested_lookup
 #TODO: these apps dont work!
 black_list = [
 		"ibm-postgres-dev",
-		"ibm-blockchain-platform-remote-peer",
+		"ibm-ace-dashboard-dev",
 		"ibm-icpmonitoring",
 		"ibm-webterminal-dev",
 		"ibm-icplogging-kibana",
 		"ibm-icplogging",
-		#"ibm-ace-dashboard-dev",
 		"ibm-ace-server-dev",
 		"ibm-cem",
 		"ibm-eventstreams-dev", 
@@ -58,7 +57,7 @@ def parse_image_repo(app_obj):
 		for repo in app_obj.repos:
 			if repo is None:#double check it
 				continue
-			#print "repo: " + repo
+
 			if "ibmcom" in repo:#repos = ibmcom/image_name or image_name or ibmcom
 				if "/" in repo:
 					app_obj.clean_repos.append(repo.split("/",1)[0])

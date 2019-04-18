@@ -200,7 +200,7 @@ def runit(app_list, hub_list):
 				org = "ppc64le"
 
 			final_repo = 'hub.docker.com/' + org + '/' + container
-			print final_repo
+			#print final_repo
 			logging.warning('%s: %s  %s ', app_obj.name, name, final_repo)
 
 			image_obj = Image(name, org, container)
