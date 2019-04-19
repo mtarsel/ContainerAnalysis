@@ -12,7 +12,7 @@ black_list = [
 		"ibm-postgres-dev",
 		"ibm-ace-dashboard-dev",
 		"ibm-ace-server-dev",
-		"ibm-eventstreams-dev", 
+		#"ibm-eventstreams-dev", 
 		"ibm-spectrum-conductor"]
 
 def mkdir_p(path):
