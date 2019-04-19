@@ -11,10 +11,6 @@ from nested_lookup import nested_lookup
 black_list = [
 		"ibm-postgres-dev",
 		"ibm-ace-dashboard-dev",
-		#"ibm-icpmonitoring",
-		#"ibm-webterminal-dev",
-		"ibm-icplogging-kibana",
-		"ibm-icplogging",
 		"ibm-ace-server-dev",
 		"ibm-cem",
 		"ibm-eventstreams-dev", 
