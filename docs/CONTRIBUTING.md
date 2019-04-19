@@ -34,7 +34,9 @@ To work on something, whether a new feature or a bugfix:
   ```
   5. Commit your code
 
-  Commit to that branch locally, and regularly push your work to the same branch on the server.
+  Commit to that branch locally, and regularly push your work to the same branch on the server. __Every commit must include a Signoff line.__ You must use the -s flag. 
+  
+  ```git commit -s```
 
   6. Commit messages
 
