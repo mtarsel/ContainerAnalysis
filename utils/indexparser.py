@@ -11,10 +11,8 @@ from nested_lookup import nested_lookup
 black_list = [
 		"ibm-postgres-dev",
 		"ibm-ace-dashboard-dev",
-		"ibm-ace-server-dev",
-		#"ibm-eventstreams-dev", 
-		"ibm-spectrum-conductor"]
-
+		"ibm-ace-server-dev"]
+		
 def mkdir_p(path):
 	"""Allow us to make sub dirs, just like mkdir -p
 	This is used to move the files from the Application tarball into the permanet 
