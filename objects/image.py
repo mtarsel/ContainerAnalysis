@@ -41,6 +41,8 @@ class App:
 			self.is_bad = True
 
 		for image_obj in self.sub_images:
+			if image_obj.name is None or image_obj.name == "":
+				print "gotcha"
 			#iterate thru images in app and set the app.is_bad var based on image info		
 			if image_obj.exist_in_repo == False:
 		 		self.is_bad = True

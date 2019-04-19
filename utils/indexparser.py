@@ -12,7 +12,7 @@ black_list = [
 		"ibm-postgres-dev",
 		"ibm-ace-dashboard-dev",
 		"ibm-ace-server-dev",
-		"ibm-cem",
+		#"ibm-cem",
 		"ibm-eventstreams-dev", 
 		"ibm-spectrum-conductor"]
 
@@ -43,6 +43,8 @@ def generate_output(app_obj):
 			outputski.write('  ' + app_obj.name + ':\n')
 			for i in range(len(app_obj.images)):
 				final_repo = 'hub.docker.com/' + app_obj.clean_repos[i] + '/' + str(app_obj.tags[i])
+				print app_obj.name
+				#print final_repo
 				outputski.write('    '+ str(app_obj.images[i]) + ': ' + final_repo + '\n')
 
 def parse_image_repo(app_obj):
