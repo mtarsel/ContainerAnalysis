@@ -12,7 +12,6 @@ black_list = [
 		"ibm-postgres-dev",
 		"ibm-ace-dashboard-dev",
 		"ibm-ace-server-dev",
-		#"ibm-cem",
 		"ibm-eventstreams-dev", 
 		"ibm-spectrum-conductor"]
 
@@ -36,6 +35,7 @@ def generate_output(app_obj):
 
 	with open ('generated_input.yaml', 'a') as outputski:
 		if len(app_obj.images) != len(app_obj.tags) or len(app_obj.repos) != len(app_obj.images):
+			#app_obj.is_bad = True
 			outputski.write('# ' + app_obj.name + ':\n')
 			outputski.write('# ***ERROR SOMETHING NOT FORMATTED CORRECTLY\n')
 			outputski.write('# *** go to ./Applications and view the values.yaml file\n')
@@ -43,9 +43,11 @@ def generate_output(app_obj):
 			outputski.write('  ' + app_obj.name + ':\n')
 			for i in range(len(app_obj.images)):
 				final_repo = 'hub.docker.com/' + app_obj.clean_repos[i] + '/' + str(app_obj.tags[i])
-				print app_obj.name
-				#print final_repo
-				outputski.write('    '+ str(app_obj.images[i]) + ': ' + final_repo + '\n')
+				image = str(app_obj.images[i])
+
+				if str(app_obj.images[i]) == "" or str(app_obj.images[i]) is None:
+					image = "imageNAme" #TODO this is a quick fix for --debug mode and ibm-cem
+				outputski.write('    '+ image + ': ' + final_repo + '\n')
 
 def parse_image_repo(app_obj):
 	"""from list of repo strings, get image names and repos.
