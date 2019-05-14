@@ -313,7 +313,7 @@ def main():
 			yaml_doc = yaml.safe_load(input_file)
 
 		if len(yaml_doc) > 2:
-			print "[registries] \n [container-images] \n format only!"
+			print("[registries] \n [container-images] \n format only!")
 			sys.exit()
 
 	app_list = parse_index_yaml(index_yaml_doc)
@@ -331,13 +331,13 @@ def main():
 	file via output_CSV() """
 
 	#TODO - output names of bad apps at end of log
-	print "\n========\n"
+	print("\n========\n")
 	i = 0
 	for app in app_list:
 		if app.is_bad == True:
 			i = i + 1
-			print app.name
-	print i
+			print(app.name)
+	print(i)
 
 if __name__ == "__main__":
 	setup_logging()
