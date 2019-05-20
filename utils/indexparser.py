@@ -5,6 +5,7 @@ import tarfile
 import urllib
 import shutil
 import logging
+import errno
 from nested_lookup import nested_lookup
 
 #TODO: these apps dont work!
