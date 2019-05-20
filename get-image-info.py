@@ -11,6 +11,7 @@ from objects.hub import Hub
 from objects.image import Image
 from objects.image import App
 from utils.indexparser import *
+from utils.tests import testit
 
 #NEVER CALLED - can be helpful in the future to see what the JSON object looks like
 def pp_json(json_thing, sort=True, indents=4):
@@ -191,6 +192,7 @@ def runit(app_list, hub_list):
 			org = str(app_obj.clean_repos[i])
 			container = str(app_obj.tags[i])
 
+			#TODO - specific test cases?
 			if app_obj.name == "ibm-ace-dashboard-dev":
 				#TODO ace-content-server, ace-dashboard, ace-icp-configurator
 				org = "ibmcom"
@@ -297,6 +299,13 @@ def main():
 	file_tmp = urllib.urlretrieve(url, filename=None)[0]
 	with open(file_tmp, 'r') as input_file:
 		index_yaml_doc = yaml.safe_load(input_file)
+
+	#TODO this single run thru for 1 app will exit once complete. preserves Applications/
+	testit("ibm-postgres-dev", index_yaml_doc)
+	#testit("ibm-ace-dashboard-dev", index_yaml_doc) 
+	#testit("ibm-redis-ha-dev", index_yaml_doc)
+	#testit("ibm-glusterfs", index_yaml_doc)
+
 
 	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
