@@ -301,7 +301,7 @@ def main():
 		index_yaml_doc = yaml.safe_load(input_file)
 
 	#TODO this single run thru for 1 app will exit once complete. preserves Applications/
-	testit("ibm-postgres-dev", index_yaml_doc)
+	#testit("ibm-postgres-dev", index_yaml_doc)
 	#testit("ibm-ace-dashboard-dev", index_yaml_doc) 
 	#testit("ibm-redis-ha-dev", index_yaml_doc)
 	#testit("ibm-glusterfs", index_yaml_doc)
