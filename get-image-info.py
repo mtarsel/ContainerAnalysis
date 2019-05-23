@@ -92,6 +92,8 @@ def output_app_keywords(main_image, f):
 	if 's390x' in main_image.keywords:
 		f.write('%s,N,N,Y\n' %(main_image.name))
 		return
+	# if arch is not in keyword, pring it out anyways
+	f.write('%s,N,N,N\n' %(main_image.name))
 
 def output_CSV(main_image, f):
 	"""from a list of images in the App, determine if all the images are supported/
@@ -300,14 +302,13 @@ def main():
 	with open(file_tmp, 'r') as input_file:
 		index_yaml_doc = yaml.safe_load(input_file)
 
+	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
+
 	#TODO this single run thru for 1 app will exit once complete. preserves Applications/
-	#testit("ibm-postgres-dev", index_yaml_doc)
+	testit("ibm-postgres-dev", index_yaml_doc)
 	#testit("ibm-ace-dashboard-dev", index_yaml_doc) 
 	#testit("ibm-redis-ha-dev", index_yaml_doc)
 	#testit("ibm-glusterfs", index_yaml_doc)
-
-
-	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""

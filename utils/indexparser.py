@@ -10,7 +10,7 @@ from nested_lookup import nested_lookup
 
 #TODO: these apps dont work!
 black_list = [
-		"ibm-postgres-dev",
+		#"ibm-postgres-dev",
 		"ibm-ace-dashboard-dev",
 		"ibm-ace-server-dev"]
 		
@@ -106,7 +106,7 @@ def get_app_info(app_obj, yaml_file):
 	if ( len(tag_from_image) > 0):
 		app_obj.tags = tag_from_image
 
-	#get the repos
+	#get the repos	
 	logging.info('%s Num of repos: %s', app_obj.name, str(len(repo_from_image)))
 	if len(repo_from_image) > 0:
 		for repo in repo_from_image:
@@ -131,7 +131,7 @@ def chart_file(members):
 			yield tarinfo
 
 def obtain_Chart_yaml(main_image, tar):
-	
+
 	tar.extractall(members=chart_file(tar))
 	for item in tar.getmembers():
 		#Avoid getting 2 of the same files.
@@ -141,7 +141,6 @@ def obtain_Chart_yaml(main_image, tar):
 			main_image.Charts_exists = True
 		
 			yaml_file_path_chart = os.path.dirname(os.path.realpath(item.name)) + "/Chart.yaml"
-		   
 		   #Open up the yaml and just extract keywords from Chart.yaml
 			with open(yaml_file_path_chart, 'r') as Chart:
 				chart_yaml_doc = yaml.safe_load(Chart)

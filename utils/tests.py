@@ -6,6 +6,7 @@ from objects.image import App
 from objects.image import Image
 
 from utils.indexparser import get_tarfile
+from utils.indexparser import mkdir_p
 
 def output_app_keywords(main_image, f):
 	""" use keywords from App. no for loop so outputs only once"""
@@ -37,6 +38,9 @@ def output_app_keywords(main_image, f):
 	if 's390x' in main_image.keywords:
 		f.write('%s,N,N,Y\n' %(main_image.name))
 		return
+
+	# if arch is not in keyword, pring it out anyways
+	f.write('%s,N,N,N\n' %(main_image.name))
 
 def output_CSV(main_image, f):
 	"""from a list of images in the App, determine if all the images are supported/
@@ -139,6 +143,22 @@ def get_registries(yaml_doc):
 			hub_list.append(hub)
 	return hub_list
 
+def print_obj(app_obj):
+
+	print "\nApp: %s \nLen Images: %s \n Sub Imgs: %s \n "%(app_obj.name, str(len(app_obj.images)), str(len(app_obj.sub_images)))
+
+	print "keywords"
+	print "----"
+	for key in app_obj.keywords:
+		print key
+
+	for image_obj in app_obj.sub_images:
+		print "\nimage name: %s"%(image_obj.name)
+		print "image org: %s"%(image_obj.org)
+		for tag in image_obj.tags:
+			print "tag: %s"%(tag)
+
+
 def testit(app_name, yaml_doc):
 	"""just get info for 1 app and print it out. 
 	Start by parsing index.yaml and create a seperate dir for the app since we will not check black_list"""
@@ -186,7 +206,7 @@ def testit(app_name, yaml_doc):
 
 		#final_repo = 'hub.docker.com/' + org + '/' + container
 		#print('%s: %s  %s ', app_obj.name, name, final_repo)
-		print "App: %s \nNum Images: %s \nImage: %s \norg: %s \ncontianer: %s \nurl: %s "%(app_obj.name, str(len(app_obj.images)), name, org, container, url_for_app)
+		#print "App: %s \nNum Images: %s \nImage: %s \norg: %s \ncontianer: %s \nurl: %s "%(app_obj.name, str(len(app_obj.images)), name, org, container, url_for_app)
 
 
 		image_obj = Image(name, org, container)
@@ -197,8 +217,6 @@ def testit(app_name, yaml_doc):
 				obj.token_auth()
 				image_obj.header = obj.header
 				break
-
-		print image_obj.name
 
 		image_obj.get_image_tag_count(regis)
 
@@ -224,6 +242,8 @@ def testit(app_name, yaml_doc):
 
 		app_obj.sub_images.append(image_obj)
 		#From here, all the vars are set for the output.
+
+	print_obj(app_obj)
 
 	f = open("results-TESTSKI.csv", "a+")
 	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
