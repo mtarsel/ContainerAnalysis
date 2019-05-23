@@ -34,7 +34,15 @@ class App:
 		"""iterate thru an App's sub images to make sure we have all the info we need.
 		if something doesn't seem right, let it be known"""
 
-		if len(self.images) != len(self.tags) or len(self.repos) != len(self.images):
+		if len(self.tags) == 0:
+			self.is_bad = True
+
+		if len(self.images) == 0:
+			self.is_bad = True
+
+		#if images != tags, just use first tag
+		#if len(self.images) != len(self.tags) or len(self.repos) != len(self.images):
+		if len(self.repos) != len(self.images):
 			self.is_bad = True
 		
 		if self.name in black_list:

@@ -104,8 +104,10 @@ def output_CSV(main_image, f):
 
 	output_app_keywords(main_image, f)
 
+	#TODO maybe verify here
+
 	if main_image.is_bad == True:
-		f.write(',,,,Images not parsed correctly from index.yaml\n')
+		f.write(',,,,Image is bad!\n')
 		return
 
 	for image_obj in main_image.sub_images:
@@ -193,8 +195,9 @@ def runit(app_list, hub_list):
 		
 			name = str(app_obj.images[i])
 			org = str(app_obj.clean_repos[i])
+
 			
-			#this check already happens in verify() but give the image first
+			#verify() will make sure tags/images != 0. use first tag for all images
 			if len(app_obj.tags) < len(app_obj.images):
 				container = str(app_obj.tags[0])
 			else:
@@ -305,10 +308,9 @@ def main():
 	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
 	#TODO this single run thru for 1 app will exit once complete. preserves Applications/
-	#testit("ibm-ace-server-dev", index_yaml_doc) 
 	#testit("ibm-ace-dashboard-dev", index_yaml_doc) 
 	#testit("ibm-redis-ha-dev", index_yaml_doc)
-	#testit("ibm-glusterfs", index_yaml_doc)
+	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""
