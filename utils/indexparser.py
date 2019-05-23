@@ -10,7 +10,6 @@ from nested_lookup import nested_lookup
 
 #TODO: these apps dont work!
 black_list = [ 
-		#"ibm-ace-dashboard-dev",
 		"ibm-microclimate",
 		"ibm-ace-server-dev"]
 		
