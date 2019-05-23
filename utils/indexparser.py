@@ -9,9 +9,8 @@ import errno
 from nested_lookup import nested_lookup
 
 #TODO: these apps dont work!
-black_list = [
-		#"ibm-postgres-dev",
-		"ibm-ace-dashboard-dev",
+black_list = [ 
+		#"ibm-ace-dashboard-dev",
 		"ibm-ace-server-dev"]
 		
 def mkdir_p(path):
@@ -77,7 +76,7 @@ def parse_image_repo(app_obj):
 		generate_output(app_obj)
 
 def get_app_info(app_obj, yaml_file):
-	"""initalize App object and loads its values.yaml into yaml_doc. 
+	"""Loads an apps values.yaml into yaml_doc. 
 	use nested_lookup library to get repositories, images, and their tags"""
 
 	with open(yaml_file, 'r') as values:
@@ -112,8 +111,14 @@ def get_app_info(app_obj, yaml_file):
 		for repo in repo_from_image:
 			if isinstance(repo, list):#could be a sub list (ibm-microservicebuilder-pipeline)
 				for i in repo:
-					# i should be in format org/app_name MUST CONTAIN /
-					if '/' in str(i):
+					if type(i) is dict: #the image name may be a dict so iterate
+						for k,v in i.items(): 
+							if "ibmcom" in str(v) and "/" in str(v):
+								#typically this means all the repos use the same tag_from_image
+								app_obj.repos.append(str(v))
+					if type(i) != dict:
+						#"ibmcom" in str(i) and "/" in str(i) and? 
+						# i should be in format org/app_name MUST CONTAIN /
 						#print "listed repo: " + str(i)
 						app_obj.repos.append(str(i))
 			else:

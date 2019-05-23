@@ -155,6 +155,7 @@ def print_obj(app_obj):
 	for image_obj in app_obj.sub_images:
 		print "\nimage name: %s"%(image_obj.name)
 		print "image org: %s"%(image_obj.org)
+		print "Num tags: %s"%(str(len(image_obj.tags)))
 		for tag in image_obj.tags:
 			print "tag: %s"%(tag)
 
@@ -196,12 +197,18 @@ def testit(app_name, yaml_doc):
 	yaml_doc = add_header_to_yaml() # add creds to top of yaml file
 	hub_list = get_registries(yaml_doc)
 
-	
+	print "\n Begin test\n app_obj.image =? app_obj.tags"
+	print len(app_obj.images)
+	print len(app_obj.tags)
 	for i in range(len(app_obj.images)):
 		
 		name = str(app_obj.images[i])
 		org = str(app_obj.clean_repos[i])
-		container = str(app_obj.tags[i])
+		
+		if len(app_obj.tags) < len(app_obj.images):
+			container = str(app_obj.tags[0])
+		else:
+			container = str(app_obj.tags[i])
 
 
 		#final_repo = 'hub.docker.com/' + org + '/' + container
