@@ -42,7 +42,7 @@ class App:
 
 		for image_obj in self.sub_images:
 			if image_obj.name is None or image_obj.name == "":
-				print "gotcha"
+				print "gotcha in verify()"
 			#iterate thru images in app and set the app.is_bad var based on image info		
 			if image_obj.exist_in_repo == False:
 		 		self.is_bad = True
@@ -80,6 +80,7 @@ class Image:
 	def add_arch(self, arch_name):
 		self.archs.append(arch_name)
 
+	#TODO: img
 	def get_image_tag_count(self, regis):
 		image_url = ('https://' + regis + '/v2/repositories/' + self.org + '/'+
 					self.name +'/tags/?page=1&page_size=100')

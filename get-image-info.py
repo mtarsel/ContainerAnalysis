@@ -186,13 +186,19 @@ def runit(app_list, hub_list):
 
 		for i in range(len(app_obj.images)):
 
+			#TODO since we output CSV during crawling, this check does not happen in testit()
 			if app_obj.is_bad == True:
 				logging.warning('%s contains a weird image from index.yaml', app_obj.name)
 				break
 		
 			name = str(app_obj.images[i])
 			org = str(app_obj.clean_repos[i])
-			container = str(app_obj.tags[i])
+			
+			#this check already happens in verify() but give the image first
+			if len(app_obj.tags) < len(app_obj.images):
+				container = str(app_obj.tags[0])
+			else:
+				container = str(app_obj.tags[i])
 
 			if name in ppc64_list:
 				org = "ppc64le"
