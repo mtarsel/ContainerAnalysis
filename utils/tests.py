@@ -145,7 +145,7 @@ def get_registries(yaml_doc):
 
 def print_obj(app_obj):
 
-	print "\nApp: %s \nLen Images: %s \n Sub Imgs: %s \n "%(app_obj.name, str(len(app_obj.images)), str(len(app_obj.sub_images)))
+	print "\nApp: %s \nLen Images: %s \n Sub Images: %s \n "%(app_obj.name, str(len(app_obj.images)), str(len(app_obj.sub_images)))
 
 	print "keywords"
 	print "----"
@@ -204,16 +204,16 @@ def testit(app_name, yaml_doc):
 		
 		name = str(app_obj.images[i])
 		org = str(app_obj.clean_repos[i])
-		
-		if len(app_obj.tags) < len(app_obj.images):
-			container = str(app_obj.tags[0])
-		else:
-			container = str(app_obj.tags[i])
 
-
-		#final_repo = 'hub.docker.com/' + org + '/' + container
-		#print('%s: %s  %s ', app_obj.name, name, final_repo)
-		#print "App: %s \nNum Images: %s \nImage: %s \norg: %s \ncontianer: %s \nurl: %s "%(app_obj.name, str(len(app_obj.images)), name, org, container, url_for_app)
+		if len(app_obj.tags) == 0:
+			print "NO CONTAINERS"
+			container = "Not found!"
+		else: 
+			print app_obj.images
+			if len(app_obj.tags) < len(app_obj.images):
+				container = str(app_obj.tags[0])
+			else:
+				container = str(app_obj.tags[i])
 
 
 		image_obj = Image(name, org, container)

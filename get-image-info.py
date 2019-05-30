@@ -196,12 +196,15 @@ def runit(app_list, hub_list):
 			name = str(app_obj.images[i])
 			org = str(app_obj.clean_repos[i])
 
-			
-			#verify() will make sure tags/images != 0. use first tag for all images
-			if len(app_obj.tags) < len(app_obj.images):
-				container = str(app_obj.tags[0])
-			else:
-				container = str(app_obj.tags[i])
+
+			if len(app_obj.tags) == 0:
+				container = "Not found!"
+			else: 
+				#print app_obj.images
+				if len(app_obj.tags) < len(app_obj.images):
+					container = str(app_obj.tags[0])
+				else:
+					container = str(app_obj.tags[i])
 
 			if name in ppc64_list:
 				org = "ppc64le"
@@ -308,9 +311,10 @@ def main():
 	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
 	#TODO this single run thru for 1 app will exit once complete. preserves Applications/
-	#testit("ibm-ace-dashboard-dev", index_yaml_doc) 
+	#testit("ibm-object-storage-plugin", index_yaml_doc) 
 	#testit("ibm-redis-ha-dev", index_yaml_doc)
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
+	#testit("ibm-eventstreams-dev", index_yaml_doc)
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""
