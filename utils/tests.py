@@ -183,8 +183,6 @@ def testit(app_name, yaml_doc):
 	#mkdir_p(str(os.getcwd() + "/Applications-TEST/" + app_obj.name)) #Create the Applications/app_name dir
 	get_tarfile(app_obj) #Download tarballs and start parsing
 
-	#TODO: Applications/ibm-ace-dashboard-dev/values.yaml! its not a sub-dir!
-
 	if str(len(app_obj.images)) == "0":
 		print app_obj.name
 		print("THIS app has no tags. Likely not parsed correctly")
@@ -209,7 +207,7 @@ def testit(app_name, yaml_doc):
 			print "NO CONTAINERS"
 			container = "Not found!"
 		else: 
-			print app_obj.images
+			#print app_obj.images
 			if len(app_obj.tags) < len(app_obj.images):
 				container = str(app_obj.tags[0])
 			else:

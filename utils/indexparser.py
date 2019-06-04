@@ -10,7 +10,7 @@ from nested_lookup import nested_lookup
 
 #TODO: these apps dont work!
 black_list = [ 
-		"ibm-microclimate",
+		#"ibm-microclimate",
 		"ibm-ace-server-dev"]
 		
 def mkdir_p(path):
@@ -84,8 +84,15 @@ def get_app_info(app_obj, yaml_file):
 
 	repo_results = nested_lookup(key='repository', document=yaml_doc, wild=True, with_keys=True)
 
+	print "repo_resulsts in get_app_info()"
+	print repo_results
+
+
 	#results from this will contain repository results
 	image_results = nested_lookup(key='image', document=yaml_doc, wild=True, with_keys=True)
+
+	print "Image_resulsts in get_app_info()"
+	print image_results
 
 	#number of tags is number of images we need to support the app name
 	tag_results = nested_lookup(key='tag', document=yaml_doc, wild=True, with_keys=True)
@@ -97,7 +104,8 @@ def get_app_info(app_obj, yaml_file):
 			repo_from_image = nested_lookup(key='imageName', document=image_results, wild=True)
 			if (len(repo_from_image) == 0):
 				repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
-
+				print "get_app_info(): repo_from_image="
+				print repo_from_image
 
 	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
 
@@ -109,6 +117,8 @@ def get_app_info(app_obj, yaml_file):
 	logging.info('%s Num of repos: %s', app_obj.name, str(len(repo_from_image)))
 	if len(repo_from_image) > 0:
 		for repo in repo_from_image:
+			print "Repo in get_app_info():"
+			print repo
 			if isinstance(repo, list):#could be a sub list (ibm-microservicebuilder-pipeline)
 				for i in repo:
 					if type(i) is dict: #the image name may be a dict so iterate
@@ -131,9 +141,13 @@ def get_app_info(app_obj, yaml_file):
 
 def chart_file(members):
 	"""just extract the Chart.yaml file so that the App's directory has only 1 file"""
+
+	#TODO break after getting the first Chart.yaml so we dont get the sub-dirs!
 	for tarinfo in members:
 		if os.path.splitext(tarinfo.name)[0].endswith("Chart") and os.path.splitext(tarinfo.name)[1] == ".yaml":
-			yield tarinfo
+			if os.path.splitext(tarinfo.name)[0].count("/") == 1: 
+			#this ensures we get the Chart.yaml in the top level dir of the App
+				yield tarinfo
 
 def obtain_Chart_yaml(main_image, tar):
 
@@ -185,16 +199,20 @@ def move_files(app_name, file_in_tar):
 def value_file(members):
 	"""just extract the values.yaml file so that the App's directory has only 1 file"""
 	for tarinfo in members:
-		if os.path.splitext(tarinfo.name)[0].endswith("values"):
-			yield tarinfo
+		if os.path.splitext(tarinfo.name)[0].endswith("values") and os.path.splitext(tarinfo.name)[1] == ".yaml":
+			if os.path.splitext(tarinfo.name)[0].count("/") == 1: 
+			#this ensures we get the values.yaml in the top level dir of the App
+				yield tarinfo
 
 def obtain_values_yaml(main_image, tar):
 	"""inside the tgz is the values.yaml which will give us the info to query
 	dockerhub"""
 	tar.extractall(members=value_file(tar))
 	for item in tar.getmembers():
+		if item.isdir():
+			return
 		#Avoid getting 2 of the same files.
-		if main_image.values_exists is True or item.isdir():
+		if main_image.values_exists is True: # or item.isdir():
 			return
 		if item.name.endswith('values.yaml') and item.isreg():
 			main_image.values_exists = True

@@ -196,7 +196,7 @@ def runit(app_list, hub_list):
 			name = str(app_obj.images[i])
 			org = str(app_obj.clean_repos[i])
 
-
+			#TODO use something like image.verify() and then start parsing it differently
 			if len(app_obj.tags) == 0:
 				container = "Not found!"
 			else: 
@@ -266,7 +266,7 @@ def parse_index_yaml(yaml_doc):
 		#TODO using black list from utils/indexparser.py
 		if main_image.name not in black_list:
 			mkdir_p(str(os.getcwd() + "/Applications/" + main_image.name)) #Create the Applications/app_name dir
-			get_tarfile(main_image) #Download tarballs and start parsing
+			get_tarfile(main_image) #Download tarballs and start parsing. Inside indexparser.py
 
 		logging.info('app: %s has %s images', main_image.name, str(len(main_image.images)))
 		app_list.append(main_image)
@@ -314,7 +314,7 @@ def main():
 	#testit("ibm-object-storage-plugin", index_yaml_doc) 
 	#testit("ibm-redis-ha-dev", index_yaml_doc)
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
-	#testit("ibm-eventstreams-dev", index_yaml_doc)
+	testit("ibm-microclimate", index_yaml_doc)
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""
