@@ -82,7 +82,7 @@ def get_app_info(app_obj, yaml_file):
 	with open(yaml_file, 'r') as values:
 		yaml_doc = yaml.safe_load(values)
 
-	#repo_results = nested_lookup(key='repository', document=yaml_doc, wild=True, with_keys=True)
+	repo_results = nested_lookup(key='repository', document=yaml_doc, wild=True, with_keys=True)
 
 	#results from this will contain repository results
 	image_results = nested_lookup(key='image', document=yaml_doc, wild=True, with_keys=True)
@@ -93,6 +93,12 @@ def get_app_info(app_obj, yaml_file):
 	#number of tags is number of images we need to support the app name
 	tag_results = nested_lookup(key='tag', document=yaml_doc, wild=True, with_keys=True)
 
+	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
+
+	#get the tags
+	if ( len(tag_from_image) > 0):
+		app_obj.tags = tag_from_image
+
 	repo_from_image = nested_lookup(key='repository', document=image_results, wild=True)
 	if (len(repo_from_image) == 0):
 		repo_from_image = nested_lookup(key='name', document=image_results, wild=True)
@@ -102,47 +108,54 @@ def get_app_info(app_obj, yaml_file):
 				repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
 				print "get_app_info(): repo_from_image="
 				print repo_from_image
-				#TODO if it's this deep in the list, lets create a variable in the App obj to know we have to iterate further
+				# if type(repo_from_image) == list: #look at ibm-microclimate
+				# 	for i in repo_from_image:
+				# 		if "ibmcom" in str(i): # likely a list which was improperly formatted
+				# 			if type(i) == list: 
+				# 				for j in i:
+				# 					print j 
+				# 					# we can parse and append these to 
+									#app_obj.repos.append() 
+									# HOWEVER this means we skip everything below.
 
-	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
+### TODO this is where teh new variable in app_obj will help. tells us its fuxed and needs further parsing
+#		SHOULD WE KEEP THE IS_BAD?
 
-	#get the tags
-	if ( len(tag_from_image) > 0):
-		app_obj.tags = tag_from_image
 
+	
+	print repo_from_image
 	#get the repos	
 	logging.info('%s Num of repos: %s', app_obj.name, str(len(repo_from_image)))
 	if len(repo_from_image) > 0:
 		for repo in repo_from_image:
 
-			print len(repo)
-			if len(repo) == 0:
-				break
+			print "\n \nthis is the the big repo \n"
+			print repo
 
-			print type(repo)
-
-			if "ibmcom" in repo: #TODO 
-				print "Repo in get_app_info():"
-				print repo
-				#TODO for microclimate, this repo var is actually a list of 2 repos along with other lists
-				if isinstance(repo, list):#could be a sub list (ibm-microservicebuilder-pipeline)
-					for i in repo:
-						print "\n"
-						print i
-						if type(i) is dict: #the image name may be a dict so iterate
-							for k,v in i.items(): 
-								if "ibmcom" in str(v) and "/" in str(v):
-									#typically this means all the repos use the same tag_from_image
-									app_obj.repos.append(str(v))
-						if type(i) != dict:
-							#"ibmcom" in str(i) and "/" in str(i) and? 
-							# i should be in format org/app_name MUST CONTAIN /
-							#print "listed repo: " + str(i)
-							app_obj.repos.append(str(i))
-				else:
-					if '/' in str(repo):
-						logging.info('repo: %s', repo)
-					app_obj.repos.append(repo)
+			#if "ibmcom" in repo: #TODO - this is adding more apps to bad list
+			print "Repo in get_app_info():"
+			print repo
+			#TODO for microclimate, this repo var is actually a list of 2 repos along with other lists
+			if isinstance(repo, list):#could be a sub list (ibm-microservicebuilder-pipeline)
+				for i in repo:
+					print "\n"
+					print i
+					if type(i) is dict: #the image name may be a dict so iterate
+						for k,v in i.items(): 
+							if "ibmcom" in str(v) and "/" in str(v):
+								#typically this means all the repos use the same tag_from_image
+								app_obj.repos.append(str(v))
+					if type(i) != dict:
+						#"ibmcom" in str(i) and "/" in str(i) and? 
+						# i should be in format org/app_name MUST CONTAIN /
+						#print "listed repo: " + str(i)
+						app_obj.repos.append(str(i))
+			else:
+				if '/' in str(repo):
+					logging.info('repo: %s', repo)
+				app_obj.repos.append(repo)
+	else: 
+		print "\n Cannot locate any repos for images. \n NADA! \n"
 
 	#NOTE: number tags != number of repos
 	parse_image_repo(app_obj)
