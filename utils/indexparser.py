@@ -10,7 +10,6 @@ from nested_lookup import nested_lookup
 
 #TODO: these apps dont work!
 black_list = [ 
-		#"ibm-microclimate",
 		"ibm-ace-server-dev"]
 		
 def mkdir_p(path):
@@ -82,7 +81,7 @@ def get_app_info(app_obj, yaml_file):
 	with open(yaml_file, 'r') as values:
 		yaml_doc = yaml.safe_load(values)
 
-	repo_results = nested_lookup(key='repository', document=yaml_doc, wild=True, with_keys=True)
+	#repo_results = nested_lookup(key='repository', document=yaml_doc, wild=True, with_keys=True)
 
 	#results from this will contain repository results
 	image_results = nested_lookup(key='image', document=yaml_doc, wild=True, with_keys=True)
@@ -91,12 +90,19 @@ def get_app_info(app_obj, yaml_file):
 	#print image_results
 
 	#number of tags is number of images we need to support the app name
-	tag_results = nested_lookup(key='tag', document=yaml_doc, wild=True, with_keys=True)
+	#tag_results = nested_lookup(key='tag', document=yaml_doc, wild=True, with_keys=True)
+
+	print "\n =============="
+	print app_obj.name
 
 	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
+	if app_obj.name == "ibm-microclimate":
+		tag_from_image = [item for sublist in tag_from_image for item in sublist]
+
 
 	#get the tags
-	if ( len(tag_from_image) > 0):
+	if (len(tag_from_image) > 0):
+		#TODO create tag.append method?
 		app_obj.tags = tag_from_image
 
 	repo_from_image = nested_lookup(key='repository', document=image_results, wild=True)
@@ -106,7 +112,7 @@ def get_app_info(app_obj, yaml_file):
 			repo_from_image = nested_lookup(key='imageName', document=image_results, wild=True)
 			if (len(repo_from_image) == 0):
 				repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
-				print "get_app_info(): repo_from_image="
+				print "\nget_app_info(): repo_from_image="
 				print repo_from_image
 				# if type(repo_from_image) == list: #look at ibm-microclimate
 				# 	for i in repo_from_image:
@@ -122,38 +128,49 @@ def get_app_info(app_obj, yaml_file):
 #		SHOULD WE KEEP THE IS_BAD?
 
 
-	
+	print "\nrepo_from_image"
 	print repo_from_image
 	#get the repos	
 	logging.info('%s Num of repos: %s', app_obj.name, str(len(repo_from_image)))
 	if len(repo_from_image) > 0:
 		for repo in repo_from_image:
 
-			print "\n \nthis is the the big repo \n"
-			print repo
-
 			#if "ibmcom" in repo: #TODO - this is adding more apps to bad list
-			print "Repo in get_app_info():"
-			print repo
+			print "\nRepo in get_app_info(): " + str(repo)
+
 			#TODO for microclimate, this repo var is actually a list of 2 repos along with other lists
 			if isinstance(repo, list):#could be a sub list (ibm-microservicebuilder-pipeline)
 				for i in repo:
-					print "\n"
-					print i
+					print "\n repo is a list, has member: " + str(i)
 					if type(i) is dict: #the image name may be a dict so iterate
+						print "\n repo is a DICT"
 						for k,v in i.items(): 
 							if "ibmcom" in str(v) and "/" in str(v):
 								#typically this means all the repos use the same tag_from_image
-								app_obj.repos.append(str(v))
+								print "\n DICT has ibmcom and slash " + str(v)
+								if type(v) is dict:
+									print "\n DICT_SUB_DICT!"
+									for j,l in v.items(): 
+										if "ibmcom" in str(l) and "/" in str(l):
+											app_obj.repos.append(str(v))
+								else:
+									app_obj.repos.append(str(v))
+							else:
+								print "\n\n NO IBMCOM \n\n"
 					if type(i) != dict:
 						#"ibmcom" in str(i) and "/" in str(i) and? 
 						# i should be in format org/app_name MUST CONTAIN /
-						#print "listed repo: " + str(i)
-						app_obj.repos.append(str(i))
+						print " repo is LIST NOT DICT: " + str(i)
+						if "ibmcom" in str(i) and "/" in str(i):
+							app_obj.repos.append(str(i))
 			else:
 				if '/' in str(repo):
+					#SEEMS LIKE THE BEST (ONLY) WORKING EXAMPLES
+					print "repo is not a SUBlist and has a slash: " + str(repo)
 					logging.info('repo: %s', repo)
-				app_obj.repos.append(repo)
+					app_obj.repos.append(repo)
+				else:
+					print "repo is not a list and has NO SLASH"
 	else: 
 		print "\n Cannot locate any repos for images. \n NADA! \n"
 
