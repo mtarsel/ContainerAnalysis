@@ -50,6 +50,8 @@ def parse_image_repo(app_obj):
 	"""from list of repo strings, get image names and repos.
 		will use ibmcom if no repo is there"""
 
+	print "\nparse_image_repo()"
+
 	if (len(app_obj.repos) != 0 and app_obj.repos is not None):
 		for repo in app_obj.repos:
 			if repo is None:#double check it
@@ -66,8 +68,11 @@ def parse_image_repo(app_obj):
 					app_obj.images.append(repo.split("/",1)[1])
 				else:
 					#its not a repo, its the image name
+					print "ibmcom NOT in repo. and NO SLASH!\n"
 					app_obj.images.append(repo)
 					app_obj.clean_repos.append("ibmcom")
+	else:
+		print "\n NADA!"
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""
@@ -96,6 +101,7 @@ def get_app_info(app_obj, yaml_file):
 	print app_obj.name
 
 	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
+	print tag_from_image
 	if app_obj.name == "ibm-microclimate":
 		tag_from_image = [item for sublist in tag_from_image for item in sublist]
 
@@ -170,6 +176,9 @@ def get_app_info(app_obj, yaml_file):
 					logging.info('repo: %s', repo)
 					app_obj.repos.append(repo)
 				else:
+					repo = "ibmcom/" + repo
+					print repo
+					app_obj.repos.append(str(repo))
 					print "repo is not a list and has NO SLASH"
 	else: 
 		print "\n Cannot locate any repos for images. \n NADA! \n"
