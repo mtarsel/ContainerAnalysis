@@ -11,6 +11,7 @@ from nested_lookup import nested_lookup
 #TODO: these apps dont work!
 black_list = [ 
 		"ibm-ace-server-dev"]
+		#"ibm-eventstreams-dev"]
 		
 def mkdir_p(path):
 	"""Allow us to make sub dirs, just like mkdir -p
@@ -101,15 +102,38 @@ def get_app_info(app_obj, yaml_file):
 	print app_obj.name
 
 	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
-	print tag_from_image
+
 	if app_obj.name == "ibm-microclimate":
 		tag_from_image = [item for sublist in tag_from_image for item in sublist]
 
+	
+	if app_obj.name == "ibm-reactive-platform-lagom-sample":
+		#this app contains a large list comprised of another list and a dict
+		#all the tags are the same so grab teh first value in the dict
+		for tag in tag_from_image:
+			print "\n"
+			print tag
+			print type(tag)
+			if type(tag) is dict:
+				for k,v in tag.items():
+					print v
+					tag_from_image = v
+					break
 
-	#get the tags
+	# add the tags to app obj
 	if (len(tag_from_image) > 0):
-		#TODO create tag.append method?
-		app_obj.tags = tag_from_image
+		if app_obj.name == "ibm-eventstreams-dev":
+			print(type(tag_from_image))
+			#the first member of the list is a dict so turn it into a dict
+			tag_dict = next(item for item in tag_from_image[0])
+
+			print tag_dict
+
+			for image,tag in tag_dict.items():
+				print str(tag)
+				app_obj.tags = str(tag)
+		else:
+			app_obj.tags = tag_from_image
 
 	repo_from_image = nested_lookup(key='repository', document=image_results, wild=True)
 	if (len(repo_from_image) == 0):
@@ -120,24 +144,14 @@ def get_app_info(app_obj, yaml_file):
 				repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
 				print "\nget_app_info(): repo_from_image="
 				print repo_from_image
-				# if type(repo_from_image) == list: #look at ibm-microclimate
-				# 	for i in repo_from_image:
-				# 		if "ibmcom" in str(i): # likely a list which was improperly formatted
-				# 			if type(i) == list: 
-				# 				for j in i:
-				# 					print j 
-				# 					# we can parse and append these to 
-									#app_obj.repos.append() 
-									# HOWEVER this means we skip everything below.
-
-### TODO this is where teh new variable in app_obj will help. tells us its fuxed and needs further parsing
-#		SHOULD WE KEEP THE IS_BAD?
 
 
 	print "\nrepo_from_image"
 	print repo_from_image
 	#get the repos	
 	logging.info('%s Num of repos: %s', app_obj.name, str(len(repo_from_image)))
+
+	# add repos to app object
 	if len(repo_from_image) > 0:
 		for repo in repo_from_image:
 
@@ -179,6 +193,7 @@ def get_app_info(app_obj, yaml_file):
 					repo = "ibmcom/" + repo
 					print repo
 					app_obj.repos.append(str(repo))
+					#TODO ibm-eventstreams-dev lands here with "ibmcom" as the repo!
 					print "repo is not a list and has NO SLASH"
 	else: 
 		print "\n Cannot locate any repos for images. \n NADA! \n"
