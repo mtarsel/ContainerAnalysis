@@ -311,8 +311,6 @@ def main():
 	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
 	#TODO this single run thru for 1 app will exit once complete. preserves Applications/
-	#testit("ibm-reactive-platform-lagom-sample", index_yaml_doc)
-	#testit("ibm-eventstreams-dev", index_yaml_doc)
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
 	"""write a yaml file to easily see exactly what info about each 

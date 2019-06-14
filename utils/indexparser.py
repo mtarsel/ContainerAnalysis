@@ -11,7 +11,6 @@ from nested_lookup import nested_lookup
 #TODO: these apps dont work!
 black_list = [ 
 		"ibm-ace-server-dev"]
-		#"ibm-eventstreams-dev"]
 		
 def mkdir_p(path):
 	"""Allow us to make sub dirs, just like mkdir -p
@@ -118,7 +117,7 @@ def get_app_info(app_obj, yaml_file):
 				for k,v in tag.items():
 					print v
 					tag_from_image = v
-					break
+					#break
 
 	# add the tags to app obj
 	if (len(tag_from_image) > 0):
