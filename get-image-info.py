@@ -263,10 +263,8 @@ def parse_index_yaml(yaml_doc):
 		
 		main_image = App(app_name, str(url_for_app))
 		
-		#TODO using black list from utils/indexparser.py
-		if main_image.name not in black_list:
-			mkdir_p(str(os.getcwd() + "/Applications/" + main_image.name)) #Create the Applications/app_name dir
-			get_tarfile(main_image) #Download tarballs and start parsing. Inside indexparser.py
+		mkdir_p(str(os.getcwd() + "/Applications/" + main_image.name)) #Create the Applications/app_name dir
+		get_tarfile(main_image) #Download tarballs and start parsing. Inside indexparser.py
 
 		logging.info('app: %s has %s images', main_image.name, str(len(main_image.images)))
 		app_list.append(main_image)
