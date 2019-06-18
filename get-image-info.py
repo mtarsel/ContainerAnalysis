@@ -200,7 +200,6 @@ def runit(app_list, hub_list):
 			if len(app_obj.tags) == 0:
 				container = "Not found!"
 			else: 
-				#print app_obj.images
 				if len(app_obj.tags) < len(app_obj.images):
 					container = str(app_obj.tags[0])
 				else:

@@ -47,8 +47,6 @@ def parse_image_repo(app_obj):
 	"""from list of repo strings, get image names and repos.
 		will use ibmcom if no repo is there"""
 
-	print "\nparse_image_repo()"
-
 	if (len(app_obj.repos) != 0 and app_obj.repos is not None):
 		for repo in app_obj.repos:
 			if repo is None:#double check it
@@ -65,11 +63,11 @@ def parse_image_repo(app_obj):
 					app_obj.images.append(repo.split("/",1)[1])
 				else:
 					#its not a repo, its the image name
-					print "ibmcom NOT in repo. and NO SLASH!\n"
+					#print "ibmcom NOT in repo. and NO SLASH!\n"
 					app_obj.images.append(repo)
 					app_obj.clean_repos.append("ibmcom")
-	else:
-		print "\n NADA!"
+	#else:
+		#print "\n NADA!"
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""
@@ -86,9 +84,6 @@ def get_app_info(app_obj, yaml_file):
 	#results from this will contain repository results
 	image_results = nested_lookup(key='image', document=yaml_doc, wild=True, with_keys=True)
 
-	print "\n =============="
-	print app_obj.name
-
 	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
 
 	if app_obj.name == "ibm-microclimate":
@@ -98,26 +93,18 @@ def get_app_info(app_obj, yaml_file):
 		#this app contains a large list comprised of another list and a dict
 		#all the tags are the same so grab teh first value in the dict
 		for tag in tag_from_image:
-			print "\n"
-			print tag
-			print type(tag)
 			if type(tag) is dict:
 				for k,v in tag.items():
-					print v
 					tag_from_image = v
 					#break
 
 	# add the tags to app obj
 	if (len(tag_from_image) > 0):
 		if app_obj.name == "ibm-eventstreams-dev":
-			print(type(tag_from_image))
 			#the first member of the list is a dict so turn it into a dict
 			tag_dict = next(item for item in tag_from_image[0])
 
-			print tag_dict
-
 			for image,tag in tag_dict.items():
-				print str(tag)
 				app_obj.tags = str(tag)
 		else:
 			app_obj.tags = tag_from_image
@@ -127,13 +114,8 @@ def get_app_info(app_obj, yaml_file):
 	#ibm-ace-server-dev is getting a dict in a list as the repo_from_image
 	if app_obj.name == "ibm-ace-server-dev":
 		#the format we get is {image: repo}
-		print "\nstarting ACE now\n"
 		ace_server_dict = next(item for item in repo_from_image)
-		print ace_server_dict
 		for image,repo in ace_server_dict.items():
-			print image
-			print repo
-			print "\n"
 			app_obj.images.append(str(image))
 			app_obj.repos.append(str(repo))
 			app_obj.clean_repos.append(str(repo))
@@ -142,7 +124,6 @@ def get_app_info(app_obj, yaml_file):
 			missing_tags = len(app_obj.images) - len(app_obj.tags)
 			for i in range(missing_tags):
 				app_obj.tags.append(str(app_obj.tags[0]))
-		print app_obj.tags
 
 		return
 
@@ -152,13 +133,7 @@ def get_app_info(app_obj, yaml_file):
 			repo_from_image = nested_lookup(key='imageName', document=image_results, wild=True)
 			if (len(repo_from_image) == 0):
 				repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
-				print "\nget_app_info(): repo_from_image="
-				print repo_from_image
 
-
-	print "\nrepo_from_image"
-	print repo_from_image
-	
 	#add repos to app obj
 	logging.info('%s Num of repos: %s', app_obj.name, str(len(repo_from_image)))
 
@@ -166,46 +141,42 @@ def get_app_info(app_obj, yaml_file):
 	if len(repo_from_image) > 0:
 		for repo in repo_from_image:
 
-			#if "ibmcom" in repo: #TODO - this is adding more apps to bad list
-			print "\nRepo in get_app_info(): " + str(repo)
-
 			#TODO for microclimate, this repo var is actually a list of 2 repos along with other lists
 			if isinstance(repo, list):#could be a sub list (ibm-microservicebuilder-pipeline)
 				for i in repo:
-					print "\n repo is a list, has member: " + str(i)
+					#print "\n repo is a list, has member: " + str(i)
 					if type(i) is dict: #the image name may be a dict so iterate
-						print "\n repo is a DICT"
+					#	print "\n repo is a DICT"
 						for k,v in i.items(): 
 							if "ibmcom" in str(v) and "/" in str(v):
 								#typically this means all the repos use the same tag_from_image
-								print "\n DICT has ibmcom and slash " + str(v)
+					#			print "\n DICT has ibmcom and slash " + str(v)
 								if type(v) is dict:
-									print "\n DICT_SUB_DICT!"
+					#				print "\n DICT_SUB_DICT!"
 									for j,l in v.items(): 
 										if "ibmcom" in str(l) and "/" in str(l):
 											app_obj.repos.append(str(v))
 								else:
 									app_obj.repos.append(str(v))
-							else:
-								print "\n\n NO IBMCOM \n\n"
+							#else:
+							#	print "\n\n NO IBMCOM \n\n"
 					if type(i) != dict:
 						#"ibmcom" in str(i) and "/" in str(i) and? 
 						# i should be in format org/app_name MUST CONTAIN /
-						print " repo is LIST NOT DICT: " + str(i)
+						#print " repo is LIST NOT DICT: " + str(i)
 						if "ibmcom" in str(i) and "/" in str(i):
 							app_obj.repos.append(str(i))
 			else:
 				if '/' in str(repo):
 					#SEEMS LIKE THE BEST (ONLY) WORKING EXAMPLES
-					print "repo is not a SUBlist and has a slash: " + str(repo)
+					#print "repo is not a SUBlist and has a slash: " + str(repo)
 					logging.info('repo: %s', repo)
 					app_obj.repos.append(repo)
 				else:
 					repo = "ibmcom/" + repo
-					print repo
 					app_obj.repos.append(str(repo))
 					#TODO ibm-eventstreams-dev lands here with "ibmcom" as the repo!
-					print "repo is not a list and has NO SLASH"
+					#print "repo is not a list and has NO SLASH"
 	else: 
 		print "\n Cannot locate any repos for images. \n NADA! \n"
 
