@@ -8,9 +8,6 @@ import logging
 import errno
 from nested_lookup import nested_lookup
 
-#TODO: these apps dont work!
-black_list = [ 
-		"ibm-ace-server-dev"]
 		
 def mkdir_p(path):
 	"""Allow us to make sub dirs, just like mkdir -p
@@ -86,16 +83,8 @@ def get_app_info(app_obj, yaml_file):
 	with open(yaml_file, 'r') as values:
 		yaml_doc = yaml.safe_load(values)
 
-	#repo_results = nested_lookup(key='repository', document=yaml_doc, wild=True, with_keys=True)
-
 	#results from this will contain repository results
 	image_results = nested_lookup(key='image', document=yaml_doc, wild=True, with_keys=True)
-
-	#print "Image_resulsts in get_app_info()"
-	#print image_results
-
-	#number of tags is number of images we need to support the app name
-	#tag_results = nested_lookup(key='tag', document=yaml_doc, wild=True, with_keys=True)
 
 	print "\n =============="
 	print app_obj.name
@@ -105,7 +94,6 @@ def get_app_info(app_obj, yaml_file):
 	if app_obj.name == "ibm-microclimate":
 		tag_from_image = [item for sublist in tag_from_image for item in sublist]
 
-	
 	if app_obj.name == "ibm-reactive-platform-lagom-sample":
 		#this app contains a large list comprised of another list and a dict
 		#all the tags are the same so grab teh first value in the dict
@@ -135,6 +123,29 @@ def get_app_info(app_obj, yaml_file):
 			app_obj.tags = tag_from_image
 
 	repo_from_image = nested_lookup(key='repository', document=image_results, wild=True)
+
+	#ibm-ace-server-dev is getting a dict in a list as the repo_from_image
+	if app_obj.name == "ibm-ace-server-dev":
+		#the format we get is {image: repo}
+		print "\nstarting ACE now\n"
+		ace_server_dict = next(item for item in repo_from_image)
+		print ace_server_dict
+		for image,repo in ace_server_dict.items():
+			print image
+			print repo
+			print "\n"
+			app_obj.images.append(str(image))
+			app_obj.repos.append(str(repo))
+			app_obj.clean_repos.append(str(repo))
+		if len(app_obj.images) != len(app_obj.tags):
+			#there is a single tag for all the images. so add more tags
+			missing_tags = len(app_obj.images) - len(app_obj.tags)
+			for i in range(missing_tags):
+				app_obj.tags.append(str(app_obj.tags[0]))
+		print app_obj.tags
+
+		return
+
 	if (len(repo_from_image) == 0):
 		repo_from_image = nested_lookup(key='name', document=image_results, wild=True)
 		if (len(repo_from_image) == 0):
@@ -147,7 +158,8 @@ def get_app_info(app_obj, yaml_file):
 
 	print "\nrepo_from_image"
 	print repo_from_image
-	#get the repos	
+	
+	#add repos to app obj
 	logging.info('%s Num of repos: %s', app_obj.name, str(len(repo_from_image)))
 
 	# add repos to app object
@@ -277,8 +289,7 @@ def obtain_values_yaml(main_image, tar):
 		if item.name.endswith('values.yaml') and item.isreg():
 			main_image.values_exists = True
 			yaml_location = move_files(main_image.name, item.name)
-			if main_image.name not in black_list: #second time we check
-				get_app_info(main_image, yaml_location)
+			get_app_info(main_image, yaml_location)
 
 def get_tarfile(main_image):
 	"""get the app name = MainImage.name along with the tgz of the app."""

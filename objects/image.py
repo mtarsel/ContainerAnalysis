@@ -30,7 +30,7 @@ class App:
 	def add_keyword(self, keyword):
 		self.keywords.append(keyword)
 
-	def verify(self, black_list):
+	def verify(self):
 		"""iterate thru an App's sub images to make sure we have all the info we need.
 		if something doesn't seem right, let it be known"""
 
@@ -43,9 +43,6 @@ class App:
 		#if images != tags, just use first tag
 		#if len(self.images) != len(self.tags) or len(self.repos) != len(self.images):
 		if len(self.repos) != len(self.images):
-			self.is_bad = True
-		
-		if self.name in black_list:
 			self.is_bad = True
 
 		for image_obj in self.sub_images:
