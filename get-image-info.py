@@ -10,6 +10,7 @@ from urllib import urlretrieve
 from objects.hub import Hub
 from objects.image import Image
 from objects.image import App
+#TODO what is actually neded from indexparser
 from utils.indexparser import *
 from utils.tests import testit
 
@@ -49,7 +50,8 @@ def setup_logging():
 						format='%(levelname)s:%(message)s')
 
 def get_registries(yaml_doc):
-	"""setup Hub objects and store in a list of objects"""
+	"""setup Hub objects and store in a list of objects. Currently the only repo we 
+	support is dockerhub so this obj is not really using its full potential"""
 
 	hub_list = [ ]
 
@@ -92,7 +94,7 @@ def output_app_keywords(main_image, f):
 	if 's390x' in main_image.keywords:
 		f.write('%s,N,N,Y\n' %(main_image.name))
 		return
-	# if arch is not in keyword, pring it out anyways
+	# if arch is not in keyword, print it out anyways
 	f.write('%s,N,N,N\n' %(main_image.name))
 
 def output_CSV(main_image, f):
@@ -104,7 +106,7 @@ def output_CSV(main_image, f):
 
 	output_app_keywords(main_image, f)
 
-	#TODO maybe verify here
+	#TODO maybe verify here?
 
 	if main_image.is_bad == True:
 		f.write(',,,,Image is bad!\n')
@@ -160,7 +162,9 @@ def output_CSV(main_image, f):
 					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
 def runit(app_list, hub_list):
-	"""This function will call output_CSV() for each App from the helm chart"""
+	""" Initialize the Image object and add tags, repos, and archs to image obj.
+	Once Image obj is setup, add it to a sublist of App obj. This function will 
+	call output_CSV() for each App from the helm chart."""
 
 	# this list contains apps which repo/org is ppc64le and not ibmcom
 	ppc64_list = [ 
@@ -184,7 +188,8 @@ def runit(app_list, hub_list):
 
 	for app_obj in app_list:
 
-		app_obj.verify() #make sure app and images have all the info
+		# make sure app and images have all the info we need. if not, its print it out
+		app_obj.verify() 
 
 		for i in range(len(app_obj.images)):
 
@@ -196,7 +201,6 @@ def runit(app_list, hub_list):
 			name = str(app_obj.images[i])
 			org = str(app_obj.clean_repos[i])
 
-			#TODO use something like image.verify() and then start parsing it differently
 			if len(app_obj.tags) == 0:
 				container = "Not found!"
 			else: 
@@ -208,13 +212,16 @@ def runit(app_list, hub_list):
 			if name in ppc64_list:
 				org = "ppc64le"
 
+			# initialize Image object
+			image_obj = Image(name, org, container)
+
 			final_repo = 'hub.docker.com/' + org + '/' + container
 			logging.warning('%s: %s  %s ', app_obj.name, name, final_repo)
+			
+			regis = 'hub.docker.com/' #TODO - add more repos. this is why hub obj is not really utilized
 
-			image_obj = Image(name, org, container)
-			regis = 'hub.docker.com/' #TODO - add more repos
-
-			for obj in hub_list: #only authorize the regis for the image we want
+			for obj in hub_list: 
+			#only authorize the regis for the image we want
 				if regis == obj.regis:
 					obj.token_auth()
 					image_obj.header = obj.header
@@ -297,8 +304,7 @@ def add_header_to_yaml():
 
 def main():
 
-	# TODO use argparse
-	# if index.yaml given, open it, otherwise download it
+	# TODO use argparse - if index.yaml given, open it, otherwise download it
 
 	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
 	file_tmp = urllib.urlretrieve(url, filename=None)[0]
@@ -307,7 +313,13 @@ def main():
 
 	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
-	#TODO this single run thru for 1 app will exit once complete. preserves Applications/
+	#TODO this single run thru for 1 app will exit once complete. 
+	# preserves Applications/ with just our single App we are testing
+	
+	# these images are BAD!
+	#testit("ibm-object-storage-plugin", index_yaml_doc)
+	#testit("ibm-spectrum-conductor", index_yaml_doc)
+	
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
 	"""write a yaml file to easily see exactly what info about each 

@@ -66,8 +66,6 @@ def parse_image_repo(app_obj):
 					#print "ibmcom NOT in repo. and NO SLASH!\n"
 					app_obj.images.append(repo)
 					app_obj.clean_repos.append("ibmcom")
-	#else:
-		#print "\n NADA!"
 
 	"""write a yaml file to easily see exactly what info about each 
 	container in the App was parsed"""
@@ -96,7 +94,6 @@ def get_app_info(app_obj, yaml_file):
 			if type(tag) is dict:
 				for k,v in tag.items():
 					tag_from_image = v
-					#break
 
 	# add the tags to app obj
 	if (len(tag_from_image) > 0):
@@ -158,25 +155,21 @@ def get_app_info(app_obj, yaml_file):
 											app_obj.repos.append(str(v))
 								else:
 									app_obj.repos.append(str(v))
-							#else:
-							#	print "\n\n NO IBMCOM \n\n"
+
 					if type(i) != dict:
-						#"ibmcom" in str(i) and "/" in str(i) and? 
-						# i should be in format org/app_name MUST CONTAIN /
-						#print " repo is LIST NOT DICT: " + str(i)
+						# it should be in format org/app_name MUST CONTAIN / (not a dict)
 						if "ibmcom" in str(i) and "/" in str(i):
 							app_obj.repos.append(str(i))
 			else:
 				if '/' in str(repo):
-					#SEEMS LIKE THE BEST (ONLY) WORKING EXAMPLES
-					#print "repo is not a SUBlist and has a slash: " + str(repo)
+					#SEEMS LIKE THE BEST (ONLY) WORKING EXAMPLES. repo aint a sublist and has a slash
 					logging.info('repo: %s', repo)
 					app_obj.repos.append(repo)
 				else:
 					repo = "ibmcom/" + repo
 					app_obj.repos.append(str(repo))
 					#TODO ibm-eventstreams-dev lands here with "ibmcom" as the repo!
-					#print "repo is not a list and has NO SLASH"
+					#repo is not a list and has no slash
 	else: 
 		print "\n Cannot locate any repos for images. \n NADA! \n"
 
@@ -186,7 +179,6 @@ def get_app_info(app_obj, yaml_file):
 def chart_file(members):
 	"""just extract the Chart.yaml file so that the App's directory has only 1 file"""
 
-	#TODO break after getting the first Chart.yaml so we dont get the sub-dirs!
 	for tarinfo in members:
 		if os.path.splitext(tarinfo.name)[0].endswith("Chart") and os.path.splitext(tarinfo.name)[1] == ".yaml":
 			if os.path.splitext(tarinfo.name)[0].count("/") == 1: 
@@ -209,7 +201,6 @@ def obtain_Chart_yaml(main_image, tar):
 				chart_yaml_doc = yaml.safe_load(Chart)
 				if (len(nested_lookup('keywords', document=chart_yaml_doc)) > 0):
 					keywords = nested_lookup('keywords', document=chart_yaml_doc)
-					#TODO handle keywords
 					for key in keywords:
 						for k in key:
 							main_image.add_keyword(k)
@@ -223,12 +214,13 @@ def move_files(app_name, file_in_tar):
 
 	original_location = os.path.dirname(os.path.realpath(file_in_tar))
 	
-	#TODO still makes a subdir of the app name which i handle below
+	#TODO - when running testit, does not make a sub dir of app name
+	# a typical big run makes a subdir of the app name which i handle below
 	new_location = os.getcwd() + "/Applications/" + app_name
 
 	logging.info('Move from %s to %s', original_location, new_location)
 
-	 #current dir is scripts main dir, so just point to Applications/app_name/values.yaml
+	#current dir is scripts main dir, so just point to Applications/app_name/values.yaml
 	shutil.move(str(original_location), str(new_location))
 
 	#recursively get the file since it's in a subdir

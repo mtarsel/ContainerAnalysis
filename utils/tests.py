@@ -6,7 +6,6 @@ from objects.image import App
 from objects.image import Image
 
 from utils.indexparser import get_tarfile
-from utils.indexparser import mkdir_p
 
 def output_app_keywords(main_image, f):
 	""" use keywords from App. no for loop so outputs only once"""
