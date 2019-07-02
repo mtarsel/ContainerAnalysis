@@ -317,8 +317,8 @@ def main():
 	# preserves Applications/ with just our single App we are testing
 	
 	# these images are BAD!
-	#testit("ibm-object-storage-plugin", index_yaml_doc)
-	#testit("ibm-spectrum-conductor", index_yaml_doc)
+	#testit("ibm-eventstreams-rhel-dev", index_yaml_doc)
+	#testit("ibm-reactive-platform-lagom-sample", index_yaml_doc)
 	
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 

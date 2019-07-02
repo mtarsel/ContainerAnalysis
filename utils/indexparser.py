@@ -84,10 +84,12 @@ def get_app_info(app_obj, yaml_file):
 
 	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
 
+	print tag_from_image
+
 	if app_obj.name == "ibm-microclimate":
 		tag_from_image = [item for sublist in tag_from_image for item in sublist]
 
-	if app_obj.name == "ibm-reactive-platform-lagom-sample":
+	if app_obj.name == "ibm-reactive-platform-lagom-sample" or app_obj.name == "ibm-eventstreams-rhel-dev":
 		#this app contains a large list comprised of another list and a dict
 		#all the tags are the same so grab teh first value in the dict
 		for tag in tag_from_image:
