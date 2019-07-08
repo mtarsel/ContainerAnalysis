@@ -84,7 +84,7 @@ def get_app_info(app_obj, yaml_file):
 
 	tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
 
-	print tag_from_image
+	#print tag_from_image
 
 	if app_obj.name == "ibm-microclimate":
 		tag_from_image = [item for sublist in tag_from_image for item in sublist]
