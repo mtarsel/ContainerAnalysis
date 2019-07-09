@@ -1,5 +1,7 @@
 results.csv
 Applications/
+*.swp
+generated_input.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

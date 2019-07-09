@@ -100,8 +100,8 @@ def get_app_info(app_obj, yaml_file):
 	# add the tags to app obj
 	if (len(tag_from_image) > 0):
 		if app_obj.name == "ibm-eventstreams-dev":
-			#the first member of the list is a dict so turn it into a dict
-			tag_dict = next(item for item in tag_from_image[0])
+			#the first member of the list is a dict so get it
+			tag_dict = tag_from_image[0]
 
 			for image,tag in tag_dict.items():
 				app_obj.tags = str(tag)
@@ -173,7 +173,7 @@ def get_app_info(app_obj, yaml_file):
 					#TODO ibm-eventstreams-dev lands here with "ibmcom" as the repo!
 					#repo is not a list and has no slash
 	else: 
-		print "\n Cannot locate any repos for images. \n NADA! \n"
+		print("\n Cannot locate any repos for images. \n NADA! \n")
 
 	#NOTE: number tags != number of repos
 	parse_image_repo(app_obj)
@@ -259,7 +259,7 @@ def obtain_values_yaml(main_image, tar):
 def get_tarfile(main_image):
 	"""get the app name = MainImage.name along with the tgz of the app."""
 
-	file_tmp = urllib.urlretrieve(main_image.url, filename=None)[0]
+	file_tmp = urllib.request.urlretrieve(main_image.url, filename=None)[0]
 	base_name = os.path.basename(main_image.url)
 	tar = tarfile.open(file_tmp)
 
