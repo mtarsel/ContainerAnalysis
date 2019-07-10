@@ -61,7 +61,6 @@ def get_repo_pages(repo_count):
 	"""
 	if repo_count <= 100:
 		logging.critical('get_repo_pages(): only 1 page of repos (less than 100 repos)')
-		sys.exit()
 
 	repo_pages = int(repo_count / 100) # how many pages to query?
 	repo_extra = int(repo_count % 100) # how many repos left on last page?
