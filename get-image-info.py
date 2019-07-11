@@ -8,8 +8,7 @@ import errno
 import shutil
 import json
 import base64
-
-from urllib import urlretrieve
+from urllib.request import urlretrieve
 from objects.hub import Hub
 from objects.image import Image
 from objects.image import App
@@ -61,8 +60,8 @@ def get_registries(yaml_doc):
 	with open(yaml_doc, 'r') as input_file:
 		yaml_doc = yaml.safe_load(input_file)
 	
-	for url in yaml_doc['registries'].iteritems():
-		for repos in url[1].iteritems():
+	for url in yaml_doc['registries'].items():
+		for repos in url[1].items():
 			hub = Hub(url[0],repos[0],repos[1])
 			hub_list.append(hub)
 	return hub_list
@@ -266,7 +265,7 @@ def parse_index_yaml(yaml_doc):
 	app_list = [ ]
    
 	#keys = MainImage.name, values=url where a tgz file contains values.yaml
-	for k, v in yaml_doc["entries"].iteritems():
+	for k, v in yaml_doc["entries"].items():
 		app_name = k 
 		url_for_app = ''.join(v[0]['urls']) #returns a list with only 1 element = url str
 		
@@ -289,13 +288,15 @@ def add_product_name(app_list):
 	r = requests.get(charts_repo_url, headers=header)
 	
 	if r.status_code == 403:
-		print "hit rate limit. Exiting..."
+		print("hit rate limit. Exiting...")
 		sys.exit()
 
 	data = json.loads(r.text)
 
+	print(len(app_list))
+	print(len(data))
 	if len(app_list) != len(data):
-		print "App list in index.yaml does match repo!"
+		print("App list in index.yaml does match repo!")
 		sys.exit()
  
  	#get the app obj instance
@@ -303,7 +304,7 @@ def add_product_name(app_list):
 		#iterate thru the request's response to get the link to apps dir where readme is
 		for i in range(len(data)):
 			if data[i]["name"] == app_obj.name:
-				print "\n" + app_obj.name
+				#print("\n" + app_obj.name)
 
 				#split the string at the ?ref=, so only use the first half[0] of the url, add the app name and README
 				readme_url = str(charts_repo_url.split('?ref=')[0] + "/" + data[i]["name"]+"/README.md")
@@ -324,10 +325,9 @@ def add_product_name(app_list):
 				#get the first line of the long string, remove the # from h1, and strip white space
 				product_name = readme.partition('\n')[0].replace('#','').encode('utf-8').strip()
 
-				print product_name
+				#print(product_name)
 
 				break #terminate inner for loop - go to next app_obj
-
 
 def add_header_to_yaml():
 	"""add creds and proper formatting to yaml so we can runit"""
@@ -359,7 +359,7 @@ def main():
 	# TODO use argparse - if index.yaml given, open it, otherwise download it
 
 	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
-	file_tmp = urllib.urlretrieve(url, filename=None)[0]
+	file_tmp = urllib.request.urlretrieve(url, filename=None)[0]
 	with open(file_tmp, 'r') as input_file:
 		index_yaml_doc = yaml.safe_load(input_file)
 
@@ -394,8 +394,6 @@ def main():
 	#returns generated_input.yaml and all the info we need to crawl
 
 	add_product_name(app_list)
-
-	sys.exit()
 
 	yaml_doc = add_header_to_yaml() # add creds to top of yaml file
 
