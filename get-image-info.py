@@ -6,6 +6,9 @@ import argparse
 import yaml
 import errno
 import shutil
+import json
+import base64
+
 from urllib import urlretrieve
 from objects.hub import Hub
 from objects.image import Image
@@ -277,6 +280,55 @@ def parse_index_yaml(yaml_doc):
 
 	return app_list
 
+def add_product_name(app_list):
+
+	charts_repo_url = "https://api.github.com/repos/IBM/charts/contents/stable?ref=master"
+
+	header = {'Authorization': 'token %s' %base64.b64decode("NGQ2MzkyM2ZjMjRjNDNhZjE4YjkxYzNhODBmZjlkZDQzZTIyYWIwYw==")}
+	
+	r = requests.get(charts_repo_url, headers=header)
+	
+	if r.status_code == 403:
+		print "hit rate limit. Exiting..."
+		sys.exit()
+
+	data = json.loads(r.text)
+
+	if len(app_list) != len(data):
+		print "App list in index.yaml does match repo!"
+		sys.exit()
+ 
+ 	#get the app obj instance
+	for app_obj in app_list:
+		#iterate thru the request's response to get the link to apps dir where readme is
+		for i in range(len(data)):
+			if data[i]["name"] == app_obj.name:
+				print "\n" + app_obj.name
+
+				#split the string at the ?ref=, so only use the first half[0] of the url, add the app name and README
+				readme_url = str(charts_repo_url.split('?ref=')[0] + "/" + data[i]["name"]+"/README.md")
+				#readme_url= str(charts_repo_url.split('?ref=')[0] + "/" + data[0]["name"]+"/README.md")
+
+				#get the readme location
+				r_app = requests.get(readme_url, headers={'Authorization':'4d63923fc24c43af18b91c3a80ff9dd43e22ab0c'})
+				readme_link = json.loads(r_app.text)
+
+				#get the link for raw readme from api
+				raw_readme_link = readme_link['download_url']
+
+				#obtaining the raw readme from API
+				r_readme = requests.get(raw_readme_link, headers={'Authorization':'4d63923fc24c43af18b91c3a80ff9dd43e22ab0c'})
+				
+				readme = r_readme.text
+
+				#get the first line of the long string, remove the # from h1, and strip white space
+				product_name = readme.partition('\n')[0].replace('#','').encode('utf-8').strip()
+
+				print product_name
+
+				break #terminate inner for loop - go to next app_obj
+
+
 def add_header_to_yaml():
 	"""add creds and proper formatting to yaml so we can runit"""
 
@@ -340,6 +392,10 @@ def main():
 
 	app_list = parse_index_yaml(index_yaml_doc)
 	#returns generated_input.yaml and all the info we need to crawl
+
+	add_product_name(app_list)
+
+	sys.exit()
 
 	yaml_doc = add_header_to_yaml() # add creds to top of yaml file
 
