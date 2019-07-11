@@ -6,7 +6,7 @@ import argparse
 import yaml
 import errno
 import shutil
-from urllib import urlretrieve
+from urllib.request import urlretrieve
 from objects.hub import Hub
 from objects.image import Image
 from objects.image import App
@@ -58,8 +58,8 @@ def get_registries(yaml_doc):
 	with open(yaml_doc, 'r') as input_file:
 		yaml_doc = yaml.safe_load(input_file)
 	
-	for url in yaml_doc['registries'].iteritems():
-		for repos in url[1].iteritems():
+	for url in yaml_doc['registries'].items():
+		for repos in url[1].items():
 			hub = Hub(url[0],repos[0],repos[1])
 			hub_list.append(hub)
 	return hub_list
@@ -263,7 +263,7 @@ def parse_index_yaml(yaml_doc):
 	app_list = [ ]
    
 	#keys = MainImage.name, values=url where a tgz file contains values.yaml
-	for k, v in yaml_doc["entries"].iteritems():
+	for k, v in yaml_doc["entries"].items():
 		app_name = k 
 		url_for_app = ''.join(v[0]['urls']) #returns a list with only 1 element = url str
 		
@@ -307,7 +307,7 @@ def main():
 	# TODO use argparse - if index.yaml given, open it, otherwise download it
 
 	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
-	file_tmp = urllib.urlretrieve(url, filename=None)[0]
+	file_tmp = urllib.request.urlretrieve(url, filename=None)[0]
 	with open(file_tmp, 'r') as input_file:
 		index_yaml_doc = yaml.safe_load(input_file)
 
