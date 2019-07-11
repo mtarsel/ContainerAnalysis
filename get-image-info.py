@@ -31,17 +31,18 @@ def setup_logging():
 	"""Begin execution here.
 	Before we call main(), setup the logging from command line args """
 	parser = argparse.ArgumentParser(
-					description='A script to get information about images from DockerHub')
+					description="A script to get information about images from DockerHub")
 
-	parser.add_argument('-d', '--debug',
+	#parser.add_argument("user.yaml", type=argparse.FileType('r'), help="user.yaml contains creds for Dockerhub and Github")
+	parser.add_argument("-d", "--debug",
 						help="DEBUG output enabled. Logs a lot of stuff",
 						action="store_const", dest="loglevel",
 						const=logging.DEBUG, default=logging.WARNING)
 
-	parser.add_argument('-v', '--verbose',help="INFO logging enabled",
+	parser.add_argument("-v", "--verbose", help="INFO logging enabled",
 					action="store_const", dest="loglevel", const=logging.INFO)
 
-	parser.add_argument('file', nargs='?', help="yaml file containing username/password and Image info", metavar='FILE.yaml')
+	parser.add_argument("-i", "--index", help="A index.yaml file from a Helm Chart", type=argparse.FileType('r'))
 		
 	args = parser.parse_args()
 		
@@ -50,6 +51,8 @@ def setup_logging():
 	# let argparse do the work for us
 	logging.basicConfig(level=args.loglevel,filename='container-output.log',
 						format='%(levelname)s:%(message)s')
+
+	return args
 
 def get_registries(yaml_doc):
 	"""setup Hub objects and store in a list of objects. Currently the only repo we 
@@ -354,24 +357,27 @@ def add_header_to_yaml():
 
 	return generated_input
 
-def main():
+def main(args):
 
-	# TODO use argparse - if index.yaml given, open it, otherwise download it
+	#optional arg for index.yaml from Helm chart, or just download latest from IBM/charts
+	if args.index:
+		if args.index.name == "index.yaml":
+			index_file = args.index
+			index_file = str(os.getcwd() + "/" + args.index.name)
+		else:
+			print("Please only supply a index.yaml from a Helm Chart. \n Exiting.")
+			sys.exit()
+	else:
+		url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
+		index_file = urllib.request.urlretrieve(url, filename=None)[0]
 
-	url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
-	file_tmp = urllib.request.urlretrieve(url, filename=None)[0]
-	with open(file_tmp, 'r') as input_file:
+	with open(index_file, 'r') as input_file:
 		index_yaml_doc = yaml.safe_load(input_file)
 
 	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
 	#TODO this single run thru for 1 app will exit once complete. 
 	# preserves Applications/ with just our single App we are testing
-	
-	# these images are BAD!
-	#testit("ibm-eventstreams-rhel-dev", index_yaml_doc)
-	#testit("ibm-reactive-platform-lagom-sample", index_yaml_doc)
-	
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
 	"""write a yaml file to easily see exactly what info about each 
@@ -416,5 +422,5 @@ def main():
 	print(i)
 
 if __name__ == "__main__":
-	setup_logging()
-	main()
+	args = setup_logging()
+	main(args)
