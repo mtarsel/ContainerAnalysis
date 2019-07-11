@@ -33,7 +33,7 @@ def setup_logging():
 	parser = argparse.ArgumentParser(
 					description="A script to get information about images from DockerHub")
 
-	#parser.add_argument("user.yaml", type=argparse.FileType('r'), help="user.yaml contains creds for Dockerhub and Github")
+	parser.add_argument("user", type=argparse.FileType('r'), help="user.yaml contains creds for Dockerhub and Github")
 	parser.add_argument("-d", "--debug",
 						help="DEBUG output enabled. Logs a lot of stuff",
 						action="store_const", dest="loglevel",
@@ -53,21 +53,6 @@ def setup_logging():
 						format='%(levelname)s:%(message)s')
 
 	return args
-
-def get_registries(yaml_doc):
-	"""setup Hub objects and store in a list of objects. Currently the only repo we 
-	support is dockerhub so this obj is not really using its full potential"""
-
-	hub_list = [ ]
-
-	with open(yaml_doc, 'r') as input_file:
-		yaml_doc = yaml.safe_load(input_file)
-	
-	for url in yaml_doc['registries'].items():
-		for repos in url[1].items():
-			hub = Hub(url[0],repos[0],repos[1])
-			hub_list.append(hub)
-	return hub_list
 
 def output_app_keywords(main_image, f):
 	""" use keywords from App. no for loop so outputs only once"""
@@ -282,11 +267,11 @@ def parse_index_yaml(yaml_doc):
 
 	return app_list
 
-def add_product_name(app_list):
+def get_product_name(app_list, github_token):
 
 	charts_repo_url = "https://api.github.com/repos/IBM/charts/contents/stable?ref=master"
 
-	header = {'Authorization': 'token %s' %base64.b64decode("NGQ2MzkyM2ZjMjRjNDNhZjE4YjkxYzNhODBmZjlkZDQzZTIyYWIwYw==")}
+	header = {'Authorization': 'token %s' %base64.b64decode(github_token)}
 	
 	r = requests.get(charts_repo_url, headers=header)
 	
@@ -332,32 +317,24 @@ def add_product_name(app_list):
 
 				break #terminate inner for loop - go to next app_obj
 
-def add_header_to_yaml():
-	"""add creds and proper formatting to yaml so we can runit"""
-
-	#if we are not in debug mode, still need creds, so create the file
-	if os.path.exists("generated_input.yaml") is False:
-		open("generated_input.yaml", 'a').close()
-
-	generated_input = os.getcwd() + "/generated_input.yaml"
-
-	f = open(generated_input, "r")
-	contents = f.readlines()
-	f.close()
-
-	contents.insert(0, "registries:\n")
-	contents.insert(1, "  hub.docker.com:\n")
-	contents.insert(2, "    ibmdev: MTAweWFyZC0=\n")
-	contents.insert(3, "container-images:\n")
-
-	f = open(generated_input, "w")
-	contents = "".join(contents)
-	f.write(contents)
-	f.close()
-
-	return generated_input
-
 def main(args):
+
+	creds_file = str(os.getcwd() + "/" + args.user.name)
+	#these vars have to be in the creds_file!
+	hub_list = [ ]
+	github_token = ""
+
+	with open(creds_file, 'r') as input_file:
+		raw_yaml_input = yaml.safe_load(input_file)
+		for url in raw_yaml_input['registries'].items():
+			if "hub.docker.com" in url[0]:
+				"""create a Hub object containing url and creds. return a list of objects"""
+				for repos in url[1].items():
+					hub = Hub(url[0],repos[0],repos[1])
+					hub_list.append(hub)
+			if "github.com" in url[0]:
+				for tokens in url[1].items():
+					github_token = tokens[1]
 
 	#optional arg for index.yaml from Helm chart, or just download latest from IBM/charts
 	if args.index:
@@ -386,26 +363,10 @@ def main(args):
 		if os.path.exists("generated_input.yaml") is True:
 			os.remove("generated_input.yaml")
 
-		#TODO how to handle repo different user/passwords?
-		yaml_doc = add_header_to_yaml() # add creds to top of yaml file
-
-		with open(yaml_doc, 'r') as input_file:
-			yaml_doc = yaml.safe_load(input_file)
-
-		if len(yaml_doc) > 2:
-			print("[registries] \n [container-images] \n format only!")
-			sys.exit()
-
 	app_list = parse_index_yaml(index_yaml_doc)
 	#returns generated_input.yaml and all the info we need to crawl
 
-	add_product_name(app_list)
-
-	yaml_doc = add_header_to_yaml() # add creds to top of yaml file
-
-	hub_list = get_registries(yaml_doc)
-	"""create a Hub object containing url and creds. return a list of
-	objects"""
+	get_product_name(app_list, github_token)
 
 	runit(app_list, hub_list) # does not read generated_input.yaml - uses App object
 	"""needs list of hubs (registries) to create special header per each
