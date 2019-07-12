@@ -25,6 +25,7 @@ class App:
 		self.values_exists = False
 		self.Charts_exists = False
 		self.is_bad = False # something did't parse correctly so its causing problems
+		self.product_name = '' #taken from README file of app
 
 
 	def add_keyword(self, keyword):

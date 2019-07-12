@@ -7,7 +7,6 @@ import yaml
 import errno
 import shutil
 import json
-import base64
 from urllib.request import urlretrieve
 from objects.hub import Hub
 from objects.image import Image
@@ -58,34 +57,34 @@ def output_app_keywords(main_image, f):
 	""" use keywords from App. no for loop so outputs only once"""
 
 	if 'amd64' in main_image.keywords and 'ppc64le' in main_image.keywords and 's390x' in main_image.keywords:
-		f.write('%s,Y,Y,Y\n' %(main_image.name)) 
+		f.write('%s,%s,Y,Y,Y\n' %(main_image.product_name,main_image.name)) 
 		return
 
 	if 'amd64' in main_image.keywords and 'ppc64le' in main_image.keywords:
-		f.write('%s,Y,Y,N\n' %(main_image.name)) 
+		f.write('%s,%s,Y,Y,N\n' %(main_image.product_name,main_image.name)) 
 		return
 	
 	if 'amd64' in main_image.keywords and 's390x' in main_image.keywords:
-		f.write('%s,Y,N,Y\n' %(main_image.name))
+		f.write('%s,%s,Y,N,Y\n' %(main_image.product_name,main_image.name))
 		return
 
 	if 'ppc64le' in main_image.keywords and 's390x' in main_image.keywords:
-		f.write('%s,N,Y,Y\n' %(main_image.name))
+		f.write('%s,%s,N,Y,Y\n' %(main_image.product_name,main_image.name))
 		return
 
 	if 'amd64' in main_image.keywords:
-		f.write('%s,Y,N,N\n' %(main_image.name))
+		f.write('%s,%s,Y,N,N\n' %(main_image.product_name,main_image.name))
 		return
 
 	if 'ppc64le' in main_image.keywords:
-		f.write('%s,N,Y,N\n' %(main_image.name))
+		f.write('%s,%s,N,Y,N\n' %(main_image.product_name,main_image.name))
 		return
 
 	if 's390x' in main_image.keywords:
-		f.write('%s,N,N,Y\n' %(main_image.name))
+		f.write('%s,%s,N,N,Y\n' %(main_image.product_name,main_image.name))
 		return
 	# if arch is not in keyword, print it out anyways
-	f.write('%s,N,N,N\n' %(main_image.name))
+	f.write('%s,%s,N,N,N\n' %(main_image.product_name,main_image.name))
 
 def output_CSV(main_image, f):
 	"""from a list of images in the App, determine if all the images are supported/
@@ -99,57 +98,57 @@ def output_CSV(main_image, f):
 	#TODO maybe verify here?
 
 	if main_image.is_bad == True:
-		f.write(',,,,Image is bad!\n')
+		f.write(',,,,,Image is bad!\n')
 		return
 
 	for image_obj in main_image.sub_images:
 
 		if image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',,,,%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,Y,Y,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',,,,%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,Y,Y,N\n' % (image_obj.name, image_obj.container))
 
 		if image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',,,,%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,Y,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',,,,%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,Y,N,N\n' % (image_obj.name, image_obj.container))
 	
 		if image_obj.is_amd64 and not image_obj.is_ppc64le and image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',,,,%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,N,Y,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',,,,%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,N,Y,N\n' % (image_obj.name, image_obj.container))
 			
 		if image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',,,,%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,N,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',,,,%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,Y,N,N,N\n' % (image_obj.name, image_obj.container))
 
 		if not image_obj.is_amd64 and image_obj.is_ppc64le and image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',,,,%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,N,Y,Y,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',,,,%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,N,Y,Y,N\n' % (image_obj.name, image_obj.container))
 
 			
 		if not image_obj.is_amd64 and image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',,,,%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,N,Y,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
-				f.write(',,,,%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,N,Y,N,N\n' % (image_obj.name, image_obj.container))
 			 
 		if not image_obj.is_amd64 and not image_obj.is_ppc64le and not image_obj.is_s390x:
 			if image_obj.is_container == True:
-				f.write(',,,,%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
+				f.write(',,,,,%s,%s,N,N,N,Y\n' % (image_obj.name, image_obj.container))
 			else:
 				if image_obj.exist_in_repo == False: #TODO could use app.is_bad??
 					main_image.is_bad = True
-					f.write(',,,,%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+					f.write(',,,,,%s NOT FOUND IN REPO,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 				else:
-					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
+					f.write(',,,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
 def runit(app_list, hub_list):
 	""" Initialize the Image object and add tags, repos, and archs to image obj.
@@ -174,7 +173,7 @@ def runit(app_list, hub_list):
 	]
 
 	f = open("results.csv", "a+")
-	f.write("App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
+	f.write("Product,App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 
 	for app_obj in app_list:
 
@@ -270,8 +269,7 @@ def parse_index_yaml(yaml_doc):
 def get_product_name(app_list, github_token):
 
 	charts_repo_url = "https://api.github.com/repos/IBM/charts/contents/stable?ref=master"
-
-	header = {'Authorization': 'token %s' %base64.b64decode(github_token)}
+	header = {'Authorization': 'token %s' %github_token}
 	
 	r = requests.get(charts_repo_url, headers=header)
 	
@@ -281,8 +279,6 @@ def get_product_name(app_list, github_token):
 
 	data = json.loads(r.text)
 
-	print(len(app_list))
-	print(len(data))
 	if len(app_list) != len(data):
 		print("App list in index.yaml does match repo!")
 		sys.exit()
@@ -292,28 +288,28 @@ def get_product_name(app_list, github_token):
 		#iterate thru the request's response to get the link to apps dir where readme is
 		for i in range(len(data)):
 			if data[i]["name"] == app_obj.name:
-				#print("\n" + app_obj.name)
 
 				#split the string at the ?ref=, so only use the first half[0] of the url, add the app name and README
 				readme_url = str(charts_repo_url.split('?ref=')[0] + "/" + data[i]["name"]+"/README.md")
 				#readme_url= str(charts_repo_url.split('?ref=')[0] + "/" + data[0]["name"]+"/README.md")
 
 				#get the readme location
-				r_app = requests.get(readme_url, headers={'Authorization':'4d63923fc24c43af18b91c3a80ff9dd43e22ab0c'})
+				r_app = requests.get(readme_url, headers=header)
 				readme_link = json.loads(r_app.text)
 
 				#get the link for raw readme from api
 				raw_readme_link = readme_link['download_url']
 
 				#obtaining the raw readme from API
-				r_readme = requests.get(raw_readme_link, headers={'Authorization':'4d63923fc24c43af18b91c3a80ff9dd43e22ab0c'})
+				r_readme = requests.get(raw_readme_link, headers=header)
 				
 				readme = r_readme.text
 
 				#get the first line of the long string, remove the # from h1, and strip white space
-				product_name = readme.partition('\n')[0].replace('#','').encode('utf-8').strip()
+				product_name = readme.partition('\n')[0].replace('#','').strip()
 
 				#print(product_name)
+				app_obj.product_name = product_name
 
 				break #terminate inner for loop - go to next app_obj
 
@@ -367,7 +363,7 @@ def main(args):
 	app_list = parse_index_yaml(index_yaml_doc) #a list of Application objects
 	#returns generated_input.yaml and all the info we need to crawl
 
-	#get_product_name(app_list, github_token)
+	get_product_name(app_list, github_token)
 
 	runit(app_list, hub_list) # does not read generated_input.yaml - uses App object
 	"""needs list of hubs (registries) to create special header per each
