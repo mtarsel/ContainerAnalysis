@@ -5,4 +5,8 @@ python:
 install:
   - pip install -e .
   - pip install -r requirements.txt
-script: pytest
+script: 
+  - curl $USER_YAML_URL > user.yaml
+  - pytest
+  - chmod +x tests/bash_tests.sh
+  - ./tests/bash_tests.sh
