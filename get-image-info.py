@@ -324,6 +324,14 @@ def main(args):
 	hub_list = [ ]
 	github_token = ""
 
+	#cleanup from last run
+	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
+
+	if logging.getLogger().level == logging.DEBUG:
+		#write a yaml file to easily see exactly what info about each container in the App was parsed
+		if os.path.exists("generated_input.yaml") is True:
+			os.remove("generated_input.yaml")
+
 	with open(creds_file, 'r') as input_file:
 		raw_yaml_input = yaml.safe_load(input_file)
 		for url in raw_yaml_input['registries'].items():
@@ -351,22 +359,14 @@ def main(args):
 	with open(index_file, 'r') as input_file:
 		index_yaml_doc = yaml.safe_load(input_file)
 
-	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
-
 	#TODO this single run thru for 1 app will exit once complete. 
 	# preserves Applications/ with just our single App we are testing
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
-	"""write a yaml file to easily see exactly what info about each 
-	container in the App was parsed"""
-	if logging.getLogger().level == logging.DEBUG:
-		if os.path.exists("generated_input.yaml") is True:
-			os.remove("generated_input.yaml")
-
-	app_list = parse_index_yaml(index_yaml_doc)
+	app_list = parse_index_yaml(index_yaml_doc) #a list of Application objects
 	#returns generated_input.yaml and all the info we need to crawl
 
-	get_product_name(app_list, github_token)
+	#get_product_name(app_list, github_token)
 
 	runit(app_list, hub_list) # does not read generated_input.yaml - uses App object
 	"""needs list of hubs (registries) to create special header per each
