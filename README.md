@@ -1,16 +1,36 @@
 # The Container Analysis Project
+[![Build Status](https://travis-ci.com/mtarsel/ContainerAnalysis.svg?branch=master)](https://travis-ci.com/mtarsel/ContainerAnalysis)
+
 An application to gather information about images and containers on DockerHub and output this helpful info into a CSV file.  
-[![Build Status](https://travis-ci.org/EthanHans3n/ContainerAnalysis.svg?branch=master)](https://travis-ci.org/EthanHans3n/ContainerAnalysis)
+
+This script will gather information from public data sources. In order to gather information online, you will have to authenticate with the websites. This is why a user.yaml file is required but is not stored in this repo.
 
 ## NOTE: currently only supports dockerhub repository
  
 # How to Run it
 
-Tested with Python 2.7
+## Create a user.yaml
+
+A yaml file containing creditentials for your repositories (i.e. dockerhub) and a Github API token. For example:
+
+```yaml
+registries:
+  hub.docker.com:
+    ibmdev: MTAwecVyZC0=
+  github.com:
+    token: NGQ2MzkyM2ZjMjRzzXDNhZjE4YjkxYzNhODBmZjlkZDQzZTIyYWIwYw==
+ ```
+
+_The user.yaml file is required to execute the script._
+
+## Install libraries
+```bash
+pip3 install -r requirements.txt
+```
+## Execute script
 
 ```bash
-pip install -r requirements.txt
-python get-image-info.py 
+python3 get-image-info.py user.yaml
 ```
 After execution is complete, you can view the [results.csv](https://github.com/mtarsel/ContainerAnalysis/blob/master/docs/results.pdf) file
 
@@ -18,15 +38,16 @@ A new directory called Applications/ will exist with more info about the Applica
 
 Please note this script may not print out every result... or correctly. values.yaml are specific to each Application and so they are all written differently.
 
-# Specify Logging
-
-By default, WARNING level logging is enabled. Otherwise run:
+# Commandline Options
 
 ```bash
 python get-image-info.py --help
 ```
 
-Output is saved to a file called container-output.log in same directory as [get-image-info.py](./get-image-info.py). 
+You can add your own index.yaml from a Helm Chart if you like.
+
+By default, WARNING level logging is enabled. Otherwise run:
+Output is saved to a file called _container-output.log_ in same directory as [get-image-info.py](./get-image-info.py). 
 
 
 # How To Gather Info on dockerhub.com
