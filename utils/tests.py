@@ -108,30 +108,6 @@ def output_CSV(main_image, f):
 				else:
 					f.write(',,,,%s,%s,N,N,N,N\n' % (image_obj.name, image_obj.container))
 
-def add_header_to_yaml():
-	"""add creds and proper formatting to yaml so we can runit"""
-
-	#if we are not in debug mode, still need creds, so create the file
-	if os.path.exists("generated_input.yaml") is False:
-		open("generated_input.yaml", 'a').close()
-
-	generated_input = os.getcwd() + "/generated_input.yaml"
-
-	f = open(generated_input, "r")
-	contents = f.readlines()
-	f.close()
-
-	contents.insert(0, "registries:\n")
-	contents.insert(1, "  hub.docker.com:\n")
-	contents.insert(2, "    ibmdev: MTAweWFyZC0=\n")
-	contents.insert(3, "container-images:\n")
-
-	f = open(generated_input, "w")
-	contents = "".join(contents)
-	f.write(contents)
-	f.close()
-
-	return generated_input
 
 def get_registries(yaml_doc):
 	"""setup Hub objects and store in a list of objects"""
@@ -176,8 +152,8 @@ def testit(app_name, yaml_doc):
 			url_for_app = ''.join(v[0]['urls']) #returns a list with only 1 element = url str
 			break
 		
-	generated_yaml_doc = add_header_to_yaml() # add creds to top of yaml file
-	hub_list = get_registries(generated_yaml_doc)
+	# generated_yaml_doc = add_header_to_yaml() # add creds to top of yaml file
+	# hub_list = get_registries(generated_yaml_doc)
 	"""create a Hub object containing url and creds. return a list of
 	objects"""
 

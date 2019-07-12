@@ -359,7 +359,8 @@ def main(args):
 	with open(index_file, 'r') as input_file:
 		index_yaml_doc = yaml.safe_load(input_file)
 
-	#TODO this single run thru for 1 app will exit once complete. 
+	#TODO this will not work with the latest input changes
+	#A single run thru for 1 app will exit once complete. 
 	# preserves Applications/ with just our single App we are testing
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
