@@ -26,6 +26,25 @@ def pp_json(json_thing, sort=True, indents=4):
 		print(json.dumps(json_thing, sort_keys=sort, indent=indents))
 	return None
 
+#prints a progress bar as a process runs with
+#how many items are complete, how many need to complete,
+#and the length of the bar on the screen
+def progress_bar(num, total, length):
+	#get decimal and integer percent done
+	proportion = num / total
+	percent = int(proportion * 100)
+	#get number of octothorpes to display
+	size = int(proportion * length)
+	#display [###   ] NN% done
+	display = '[' + ('#' * size) + (' ' * (length - size)) + '] ' + str(percent) + '% done'
+	#write with stdout to allow for in-place printing
+	sys.stdout.write(display)
+	sys.stdout.flush()
+	sys.stdout.write("\b" * 300)
+	#return the proportion for logging
+	return percent
+	
+
 def setup_logging():
 	"""Begin execution here.
 	Before we call main(), setup the logging from command line args """
@@ -174,11 +193,19 @@ def runit(app_list, hub_list):
 
 	f = open("results.csv", "a+")
 	f.write("Product,App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
-
+	
+	#used for the progress bar
+	num_tracker = 0
+	
 	for app_obj in app_list:
 
 		# make sure app and images have all the info we need. if not, its print it out
 		app_obj.verify() 
+		
+		#make a progress bar out of the length of app_list and number already processed
+		num_tracker += 1
+		percent = progress_bar(num_tracker, len(app_list), 50)
+		logging.info("Percent through runit: {}".format(percent))
 
 		for i in range(len(app_obj.images)):
 
