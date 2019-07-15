@@ -14,8 +14,7 @@ script:
   - if [ $TRAVIS_PULL_REQUEST != false ]; then 
         ./tests/pr_okay_tests.sh;
     else
-        #Download user.yaml file from a super secret URL that we enter as a Travis Environment variable
-  `     #curl $USER_YAML_URL > user.yaml;
+  `     curl $USER_YAML_URL > user.yaml; #Download user.yaml file from a super secret URL that we enter as a Travis Environment variable
         ./tests/nPR_tests.sh;
         ./tests/pr_okay_tests.sh;
     fi
