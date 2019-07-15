@@ -13,10 +13,10 @@ script:
   - chmod +x tests/pr_okay_tests.sh
   #If it is a PR build, we can only run certain tests
   - if [ $TRAVIS_PULL_REQUEST != false ]; then 
-      ./tests/pr_okay_tests.sh;
+        ./tests/pr_okay_tests.sh;
     else  #Otherwise, we can run everything
-      #Download user.yaml file from a super secret URL that we enter as a Travis Environment variable
-      curl $USER_YAML_URL > user.yaml;
-      ./tests/nPR_tests.sh;
-      ./tests/pr_okay_tests.sh;
+        #Download user.yaml file from a super secret URL that we enter as a Travis Environment variable
+        curl $USER_YAML_URL > user.yaml;
+        ./tests/nPR_tests.sh;
+        ./tests/pr_okay_tests.sh;
     fi
