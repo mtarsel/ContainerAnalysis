@@ -5,3 +5,4 @@
 
 #Run python get-image-info with different arguments
 python get-image-info.py --help
+
