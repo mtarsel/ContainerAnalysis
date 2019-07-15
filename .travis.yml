@@ -14,7 +14,6 @@ script:
   - if [ $TRAVIS_PULL_REQUEST != false ]; then 
         ./tests/pr_okay_tests.sh;
     else
-  `     curl $USER_YAML_URL > user.yaml;
         ./tests/nPR_tests.sh;
         ./tests/pr_okay_tests.sh;
     fi
