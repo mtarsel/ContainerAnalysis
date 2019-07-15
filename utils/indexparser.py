@@ -178,6 +178,25 @@ def get_app_info(app_obj, yaml_file):
 	#NOTE: number tags != number of repos
 	parse_image_repo(app_obj)
 
+def move_files(app_name):
+	"""once we have the values.yaml or Chart.yaml, move these files to 
+	Applications/app_name/ so we can read the yaml files from there and close the tarfile"""
+
+	original_dir_location = os.getcwd() + "/{}".format(app_name)
+	print(original_dir_location)
+	
+	#TODO - when running testit, does not make a sub dir of app name
+	# a typical big run makes a subdir of the app name which i handle below
+	new_dir_location = os.getcwd() + "/Applications/" + app_name
+	print(new_dir_location)
+
+	logging.info('Move from %s to %s', original_dir_location, new_dir_location)
+
+	#current dir is scripts main dir, so just point to Applications/app_name/
+	yaml_dir_location = shutil.move(str(original_dir_location), str(new_dir_location))
+
+	return yaml_dir_location
+
 def chart_file(members):
 	"""just extract the Chart.yaml file so that the App's directory has only 1 file"""
 
@@ -198,40 +217,13 @@ def obtain_Chart_yaml(main_image, tar):
 			main_image.Charts_exists = True
 		
 			yaml_file_path_chart = os.path.dirname(os.path.realpath(item.name)) + "/Chart.yaml"
-		   #Open up the yaml and just extract keywords from Chart.yaml
-			with open(yaml_file_path_chart, 'r') as Chart:
-				chart_yaml_doc = yaml.safe_load(Chart)
+			#Open up the yaml and just extract keywords from Chart.yaml
+			with open(yaml_file_path_chart, 'r') as Chart_file:
+				chart_yaml_doc = yaml.safe_load(Chart_file)
 				if (len(nested_lookup('keywords', document=chart_yaml_doc)) > 0):
 					keywords = nested_lookup('keywords', document=chart_yaml_doc)
-					for key in keywords:
-						for k in key:
-							main_image.add_keyword(k)
-					
-			#done with the re-extracted folder so remove it
-			shutil.rmtree(str(os.getcwd() + "/" + main_image.name))
-
-def move_files(app_name, file_in_tar):
-	"""once we have the values.yaml or Chart.yaml, move these files to 
-	Applications/app_name/ so we can read the yaml files from there and close the tarfile"""
-
-	original_location = os.path.dirname(os.path.realpath(file_in_tar))
-	
-	#TODO - when running testit, does not make a sub dir of app name
-	# a typical big run makes a subdir of the app name which i handle below
-	new_location = os.getcwd() + "/Applications/" + app_name
-
-	logging.info('Move from %s to %s', original_location, new_location)
-
-	#current dir is scripts main dir, so just point to Applications/app_name/values.yaml
-	shutil.move(str(original_location), str(new_location))
-
-	#recursively get the file since it's in a subdir
-	for root, dirs, files in os.walk(new_location):
-		for file in files:
-			if file.endswith(".yaml"):
-				yaml_location = os.path.join(root, file)
-
-	return yaml_location
+					for key in keywords[0]:
+						main_image.add_keyword(key)
 
 def value_file(members):
 	"""just extract the values.yaml file so that the App's directory has only 1 file"""
@@ -246,22 +238,20 @@ def obtain_values_yaml(main_image, tar):
 	dockerhub"""
 	tar.extractall(members=value_file(tar))
 	for item in tar.getmembers():
-		if item.isdir():
-			return
 		#Avoid getting 2 of the same files.
-		if main_image.values_exists is True: # or item.isdir():
+		if main_image.values_exists is True or item.isdir():
 			return
 		if item.name.endswith('values.yaml') and item.isreg():
 			main_image.values_exists = True
-			yaml_location = move_files(main_image.name, item.name)
+			yaml_dir_location = move_files(main_image.name)
+			yaml_location = yaml_dir_location + "/values.yaml"
 			get_app_info(main_image, yaml_location)
 
 def get_tarfile(main_image):
 	"""get the app name = MainImage.name along with the tgz of the app."""
 
-	file_tmp = urllib.request.urlretrieve(main_image.url, filename=None)[0]
-	base_name = os.path.basename(main_image.url)
-	tar = tarfile.open(file_tmp)
+	file_tmp_loc = urllib.request.urlretrieve(main_image.url, filename=None)[0]
+	tar = tarfile.open(file_tmp_loc)
 
 	obtain_values_yaml(main_image, tar)
 	obtain_Chart_yaml(main_image,tar)
