@@ -194,8 +194,14 @@ def runit(app_list, hub_list):
 		"ibmcorp/db2_developer_c",
 		"ibmcorp/db2_developer_c"
 	]
+	
+	#set up file name, make directory if it doesn't exist
+	date = datetime.today().strftime("%d-%b-%Y")	#16-Jul-2019
+	results_file_loc = "archives/results-{}.csv".format(date)
+	os.makedirs("archives", exist_ok=True)
 
-	f = open("results.csv", "a+")
+	#re-writes files on the same day, leaves old files
+	f = open(results_file_loc, "w+")
 	f.write("Product,App,amd64,ppc64le,s390x,Images,Container,amd64,ppc64le,s390x,Tag Exists?\n")
 	
 	#used for the progress bar
