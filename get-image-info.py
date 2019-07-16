@@ -1,4 +1,5 @@
-""" Written by Mick Tarsel"""
+""" Written by Mick Tarsel
+	Optimized by Ethan Hansen"""
 import sys
 import requests
 import logging
@@ -14,6 +15,7 @@ from objects.image import App
 #TODO what is actually neded from indexparser
 from utils.indexparser import *
 from utils.tests import testit
+from datetime import datetime
 
 #NEVER CALLED - can be helpful in the future to see what the JSON object looks like
 def pp_json(json_thing, sort=True, indents=4):
@@ -61,6 +63,8 @@ def setup_logging():
 					action="store_const", dest="loglevel", const=logging.INFO)
 
 	parser.add_argument("-i", "--index", help="A index.yaml file from a Helm Chart", type=argparse.FileType('r'))
+
+	parser.add_argument("-k", "--keep", help="Keeps old values and chart files", action="store_true", dest="keep_files")
 		
 	args = parser.parse_args()
 		
@@ -273,10 +277,14 @@ def runit(app_list, hub_list):
 		output_CSV(app_obj, f) # After creating a list of all the subimages in mainImage, output it
 	f.close() #close csv file
 
-def parse_index_yaml(yaml_doc):
+def parse_index_yaml(yaml_doc, download_tarfile):
 	"""parse index.yaml (the helm chart) and initalize the App object"""
 
 	app_list = [ ]
+
+	if (download_tarfile is True):
+		#cleanup from last run
+		shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
    
 	#keys = MainImage.name, values=url where a tgz file contains values.yaml
 	for k, v in yaml_doc["entries"].items():
@@ -286,7 +294,12 @@ def parse_index_yaml(yaml_doc):
 		main_image = App(app_name, str(url_for_app))
 		
 		mkdir_p(str(os.getcwd() + "/Applications/" + main_image.name)) #Create the Applications/app_name dir
-		get_tarfile(main_image) #Download tarballs and start parsing. Inside indexparser.py
+		if (download_tarfile is True):
+			yaml_location = get_tarfile(main_image) #Download tarballs and start parsing. Inside indexparser.py
+			get_app_info(main_image, yaml_location)
+		else:
+			yaml_location = os.getcwd() + "/Applications/{}/{}/values.yaml".format(main_image.name, main_image.name)
+			get_app_info(main_image, yaml_location)
 
 		logging.info('app: %s has %s images', main_image.name, str(len(main_image.images)))
 		app_list.append(main_image)
@@ -342,29 +355,26 @@ def get_product_name(app_list, github_token):
 
 def main(args):
 
-	creds_file = str(os.getcwd() + "/" + args.user.name)
+	creds_file_loc = str(os.getcwd() + "/" + args.user.name)
 	#these vars have to be in the creds_file!
 	hub_list = [ ]
 	github_token = ""
-
-	#cleanup from last run
-	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
 	if logging.getLogger().level == logging.DEBUG:
 		#write a yaml file to easily see exactly what info about each container in the App was parsed
 		if os.path.exists("generated_input.yaml") is True:
 			os.remove("generated_input.yaml")
 
-	with open(creds_file, 'r') as input_file:
-		raw_yaml_input = yaml.safe_load(input_file)
-		for url in raw_yaml_input['registries'].items():
-			if "hub.docker.com" in url[0]:
+	with open(creds_file_loc, 'r') as creds_file:	#Open up creds_file (typically user.yaml) 
+		raw_yaml_input = yaml.safe_load(creds_file)	#load the yaml from creds file
+		for site_info in raw_yaml_input['registries'].items():	#for each site with creds
+			if "hub.docker.com" in site_info[0]:		#site_info[0] is url of site
 				"""create a Hub object containing url and creds. return a list of objects"""
-				for repos in url[1].items():
-					hub = Hub(url[0],repos[0],repos[1])
+				for repos in site_info[1].items():	#site_info[1] is dict of (typically) user:pass
+					hub = Hub(site_info[0],repos[0],repos[1]) #Hub(url, user, pass)
 					hub_list.append(hub)
-			if "github.com" in url[0]:
-				for tokens in url[1].items():
+			if "github.com" in site_info[0]:
+				for tokens in site_info[1].items():
 					github_token = tokens[1]
 
 	#optional arg for index.yaml from Helm chart, or just download latest from IBM/charts
@@ -377,18 +387,17 @@ def main(args):
 			sys.exit()
 	else:
 		url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
-		index_file = urllib.request.urlretrieve(url, filename=None)[0]
+		index_file_loc = urllib.request.urlretrieve(url)[0]	#returns (localFileName, Headers)
 
-	with open(index_file, 'r') as input_file:
-		index_yaml_doc = yaml.safe_load(input_file)
+	with open(index_file_loc, 'r') as index_file:		#open the index file
+		index_yaml_doc = yaml.safe_load(index_file)	#and load the yaml to the program
 
 	#TODO this will not work with the latest input changes
 	#A single run thru for 1 app will exit once complete. 
 	# preserves Applications/ with just our single App we are testing
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
-	app_list = parse_index_yaml(index_yaml_doc) #a list of Application objects
-	#returns generated_input.yaml and all the info we need to crawl
+	app_list = parse_index_yaml(index_yaml_doc, not args.keep_files) #a list of Application objects
 
 	get_product_name(app_list, github_token)
 
@@ -407,5 +416,10 @@ def main(args):
 	print(i)
 
 if __name__ == "__main__":
+	start_time = datetime.now()
+
 	args = setup_logging()
 	main(args)
+
+	end_time = datetime.now()
+	print("Time to run program: {}".format(end_time - start_time))
