@@ -63,6 +63,8 @@ def setup_logging():
 					action="store_const", dest="loglevel", const=logging.INFO)
 
 	parser.add_argument("-i", "--index", help="A index.yaml file from a Helm Chart", type=argparse.FileType('r'))
+
+	parser.add_argument("-k", "--keep", help="Keeps old values and chart files", action="store_true", dest="keep_files")
 		
 	args = parser.parse_args()
 		
@@ -275,10 +277,14 @@ def runit(app_list, hub_list):
 		output_CSV(app_obj, f) # After creating a list of all the subimages in mainImage, output it
 	f.close() #close csv file
 
-def parse_index_yaml(yaml_doc):
+def parse_index_yaml(yaml_doc, download_tarfile):
 	"""parse index.yaml (the helm chart) and initalize the App object"""
 
 	app_list = [ ]
+
+	if (download_tarfile is True):
+		#cleanup from last run
+		shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
    
 	#keys = MainImage.name, values=url where a tgz file contains values.yaml
 	for k, v in yaml_doc["entries"].items():
@@ -288,7 +294,12 @@ def parse_index_yaml(yaml_doc):
 		main_image = App(app_name, str(url_for_app))
 		
 		mkdir_p(str(os.getcwd() + "/Applications/" + main_image.name)) #Create the Applications/app_name dir
-		get_tarfile(main_image) #Download tarballs and start parsing. Inside indexparser.py
+		if (download_tarfile is True):
+			yaml_location = get_tarfile(main_image) #Download tarballs and start parsing. Inside indexparser.py
+			get_app_info(main_image, yaml_location)
+		else:
+			yaml_location = os.getcwd() + "/Applications/{}/{}/values.yaml".format(main_image.name, main_image.name)
+			get_app_info(main_image, yaml_location)
 
 		logging.info('app: %s has %s images', main_image.name, str(len(main_image.images)))
 		app_list.append(main_image)
@@ -349,9 +360,6 @@ def main(args):
 	hub_list = [ ]
 	github_token = ""
 
-	#cleanup from last run
-	shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
-
 	if logging.getLogger().level == logging.DEBUG:
 		#write a yaml file to easily see exactly what info about each container in the App was parsed
 		if os.path.exists("generated_input.yaml") is True:
@@ -389,7 +397,7 @@ def main(args):
 	# preserves Applications/ with just our single App we are testing
 	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
-	app_list = parse_index_yaml(index_yaml_doc) #a list of Application objects
+	app_list = parse_index_yaml(index_yaml_doc, not args.keep_files) #a list of Application objects
 
 	get_product_name(app_list, github_token)
 
@@ -409,7 +417,9 @@ def main(args):
 
 if __name__ == "__main__":
 	start_time = datetime.now()
+
 	args = setup_logging()
 	main(args)
+
 	end_time = datetime.now()
 	print("Time to run program: {}".format(end_time - start_time))

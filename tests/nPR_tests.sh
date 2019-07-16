@@ -3,6 +3,7 @@
 #test different args to get-image-info
 python get-image-info.py user.yaml
 python get-image-info.py user.yaml --debug
+python get-image-info.py user.yaml --keep
 
 #gets number of columns in results.csv
 #head -l outputs the first row of the file

@@ -183,12 +183,10 @@ def move_files(app_name):
 	Applications/app_name/ so we can read the yaml files from there and close the tarfile"""
 
 	original_dir_location = os.getcwd() + "/{}".format(app_name)
-	print(original_dir_location)
 	
 	#TODO - when running testit, does not make a sub dir of app name
 	# a typical big run makes a subdir of the app name which i handle below
 	new_dir_location = os.getcwd() + "/Applications/" + app_name
-	print(new_dir_location)
 
 	logging.info('Move from %s to %s', original_dir_location, new_dir_location)
 
@@ -225,6 +223,9 @@ def obtain_Chart_yaml(main_image, tar):
 					for key in keywords[0]:
 						main_image.add_keyword(key)
 
+			yaml_location = move_files(main_image.name)
+			return yaml_location
+
 def value_file(members):
 	"""just extract the values.yaml file so that the App's directory has only 1 file"""
 	for tarinfo in members:
@@ -243,15 +244,16 @@ def obtain_values_yaml(main_image, tar):
 			return
 		if item.name.endswith('values.yaml') and item.isreg():
 			main_image.values_exists = True
-			yaml_dir_location = move_files(main_image.name)
-			yaml_location = yaml_dir_location + "/values.yaml"
-			get_app_info(main_image, yaml_location)
+			yaml_location = os.getcwd() + "/{}".format(item.name)
+			return yaml_location
 
 def get_tarfile(main_image):
 	"""get the app name = MainImage.name along with the tgz of the app."""
-
+	print(main_image.url)
 	file_tmp_loc = urllib.request.urlretrieve(main_image.url, filename=None)[0]
 	tar = tarfile.open(file_tmp_loc)
 
 	obtain_values_yaml(main_image, tar)
-	obtain_Chart_yaml(main_image,tar)
+	yaml_location = obtain_Chart_yaml(main_image,tar) + "/values.yaml"
+
+	return yaml_location
