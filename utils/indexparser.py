@@ -249,7 +249,6 @@ def obtain_values_yaml(main_image, tar):
 
 def get_tarfile(main_image):
 	"""get the app name = MainImage.name along with the tgz of the app."""
-	print(main_image.url)
 	file_tmp_loc = urllib.request.urlretrieve(main_image.url, filename=None)[0]
 	tar = tarfile.open(file_tmp_loc)
 
