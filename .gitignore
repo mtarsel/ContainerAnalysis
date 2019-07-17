@@ -4,6 +4,7 @@ results.csv
 Applications/
 *.swp
 generated_input.yaml
+archives/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
