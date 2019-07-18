@@ -27,7 +27,7 @@ def main(args):
 	#either local or remote
 	index_yaml_loc = get_index_yaml(args)
 
-	app_list, need_keywords_list = parse_index_yaml(index_yaml_loc) #a list of Application objects
+	app_list, need_keywords_list = parse_index_yaml(index_yaml_loc, args.test_names) #a list of Application objects
 
 	output_f = setup_output_file()
 

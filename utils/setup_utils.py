@@ -30,7 +30,7 @@ def mkdir_p(path):
 #prints a progress bar as a process runs with
 #how many items are complete, how many need to complete,
 #and the length of the bar on the screen
-def progress_bar(num, total, length):
+def progress_bar(num, total, length=50):
 	#get decimal and integer percent done
 	proportion = num / total
 	percent = int(proportion * 100)
@@ -63,6 +63,8 @@ def setup_logging():
 	parser.add_argument("-i", "--index", help="A index.yaml file from a Helm Chart", type=argparse.FileType('r'))
 
 	parser.add_argument("-k", "--keep", help="Keeps old values and chart files", action="store_true", dest="keep_files")
+
+	parser.add_argument("-t", "--test", help="tests a list of specific app names (1 or more input(s))", nargs='+', dest="test_names")
 		
 	args = parser.parse_args()
 		
@@ -100,7 +102,7 @@ def get_index_yaml(args):
 		url = "https://raw.githubusercontent.com/IBM/charts/master/repo/stable/index.yaml"
 		return urllib.request.urlretrieve(url)[0]	#gets index.yaml and returns localFileName
 
-def parse_index_yaml(index_file_loc):
+def parse_index_yaml(index_file_loc, wanted_apps=None):
 	app_list = []
 	need_keywords_list = []
 
@@ -110,17 +112,21 @@ def parse_index_yaml(index_file_loc):
 	#keys = MainImage.name, values=other info about the app
 	for k, v in index_yaml_doc["entries"].items():	
 		app_name = k.replace('/', '')
-		url_for_app = "https://raw.githubusercontent.com/IBM/charts/master/stable/{}/".format(app_name)
 
-		try:
-			keywords = v[0]['keywords']
-		except:
-			need_keywords_list.append(app_name)
+		if (wanted_apps == None or app_name in wanted_apps):
+			url_for_app = "https://raw.githubusercontent.com/IBM/charts/master/stable/{}/".format(app_name)
+			
+			keywords = []
 
-		main_image = App(app_name, url_for_app)
-		for key in keywords:
-			main_image.add_keyword(key)
-		app_list.append(main_image)
+			try:
+				keywords = v[0]['keywords']
+			except:
+				need_keywords_list.append(app_name)
+
+			main_image = App(app_name, url_for_app)
+			for key in keywords:
+				main_image.add_keyword(key)
+			app_list.append(main_image)
 	
 	return app_list, need_keywords_list #currently just apps with names and base urls
 
