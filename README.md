@@ -11,14 +11,12 @@ This script will gather information from public data sources. In order to gather
 
 ## Create a user.yaml
 
-A yaml file containing creditentials for your repositories (i.e. dockerhub) and a Github API token. For example:
+A yaml file containing creditentials for your repositories (i.e. dockerhub). For example:
 
 ```yaml
 registries:
   hub.docker.com:
     ibmdev: MTAwecVyZC0=
-  github.com:
-    token: NGQ2MzkyM2ZjMjRzzXDNhZjE4YjkxYzNhODBmZjlkZDQzZTIyYWIwYw==
  ```
 
 _The user.yaml file is required to execute the script._

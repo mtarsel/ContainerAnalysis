@@ -6,8 +6,8 @@ import shutil
 import json
 from objects.image import Image
 #TODO what is actually neded from indexparser
-from utils.indexparser import *
-from utils.tests import testit
+#from utils.indexparser import *
+#from utils.tests import testit
 from datetime import datetime
 from utils.setup_utils import *
 
@@ -21,16 +21,11 @@ def main(args):
 		if os.path.exists("generated_input.yaml") is True:
 			os.remove("generated_input.yaml")
 	
-	#get the hubs credentials from the creds file (user.yaml)
-	hub_list, github_token = parse_creds(creds_file_loc)
+	#get the hub creds (user.yaml)
+	hub_list = parse_creds(creds_file_loc)
 
 	#either local or remote
 	index_yaml_loc = get_index_yaml(args)
-
-	#TODO this will not work with the latest input changes
-	#A single run thru for 1 app will exit once complete. 
-	# preserves Applications/ with just our single App we are testing
-	#testit("ibm-glusterfs", index_yaml_doc) #working example
 
 	app_list, need_keywords_list = parse_index_yaml(index_yaml_loc) #a list of Application objects
 

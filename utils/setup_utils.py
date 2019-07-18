@@ -5,9 +5,27 @@ import urllib
 from datetime import datetime
 import sys
 import os
+import errno
 
 from objects.hub import Hub
 from objects.image import App
+
+#Just making sure travis CI works for now
+def travis_trial():
+	print("It works")
+	return True
+
+def mkdir_p(path):
+	"""Allow us to make sub dirs, just like mkdir -p
+	This is used to move the files from the Application tarball into the permanet 
+	Applications dir in the root of the project's dir. Why you ask? For debuggin of course!"""
+	try:
+		os.makedirs(path)
+	except OSError as exc:  # Python >2.5
+		if exc.errno == errno.EEXIST and os.path.isdir(path):
+			pass
+		else:
+			raise
 
 #prints a progress bar as a process runs with
 #how many items are complete, how many need to complete,
@@ -58,7 +76,6 @@ def setup_logging():
 
 def parse_creds(creds_file_loc):
 	hub_list = []
-	github_token = ""
 
 	with open(creds_file_loc, 'r') as creds_file:	#Open up creds_file (typically user.yaml) 
 		raw_yaml_input = yaml.safe_load(creds_file)	#load the yaml from creds file
@@ -68,11 +85,8 @@ def parse_creds(creds_file_loc):
 				for repos in site_info[1].items():	#site_info[1] is dict of (typically) user:pass
 					hub = Hub(site_info[0],repos[0],repos[1]) #Hub(url, user, pass)
 					hub_list.append(hub)
-			if "github.com" in site_info[0]:
-				for tokens in site_info[1].items():
-					github_token = tokens[1]
 
-	return hub_list, github_token
+	return hub_list
 
 def get_index_yaml(args):
 	#optional arg for index.yaml from Helm chart, or just download latest from IBM/charts
