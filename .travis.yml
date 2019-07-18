@@ -13,9 +13,11 @@ script:
         ./tests/pr_okay_tests.sh;
     else
         curl $USER_YAML_URL > user.yaml;
-        curl https://gist.githubusercontent.com/EthanHans3n/e04fd56109d6ab78691085f64e011165/raw/b6ec497f253c88a4811ba7ae027e2207d7a67e5e/test_index.yaml > test_index.yaml;
         ./tests/nPR_tests.sh;
         ./tests/pr_okay_tests.sh;
     fi
+  #get these two for pytest
+  - curl https://gist.githubusercontent.com/EthanHans3n/e04fd56109d6ab78691085f64e011165/raw/b6ec497f253c88a4811ba7ae027e2207d7a67e5e/test_index.yaml > test_index.yaml
+  - curl https://gist.githubusercontent.com/EthanHans3n/0bf9763d8f5c30950b5e7cd46371ff14/raw/523e47f3e7535cf88e9632aae20874abe794de74/user.yaml > user.yaml
   #Runs tests of specific functions nicely (see tests/*.py)
   - pytest
