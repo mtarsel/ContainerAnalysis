@@ -1,6 +1,0 @@
-import pytest
-
-from utils.setup_utils import travis_trial
-
-def test_travis_1():
-	assert(travis_trial() == True)
