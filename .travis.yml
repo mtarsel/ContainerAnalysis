@@ -16,8 +16,5 @@ script:
         ./tests/nPR_tests.sh;
         ./tests/pr_okay_tests.sh;
     fi
-  #get these two for pytest
-  - curl https://gist.githubusercontent.com/EthanHans3n/e04fd56109d6ab78691085f64e011165/raw/b6ec497f253c88a4811ba7ae027e2207d7a67e5e/test_index.yaml > test_index.yaml
-  - curl https://gist.githubusercontent.com/EthanHans3n/b430383436a350b149192c3c0d2744cb/raw/f986e16539bbd37768d369e9d78a153864cea93a/test_user.yaml > test_user.yaml
   #Runs tests of specific functions nicely (see tests/*.py)
   - pytest
