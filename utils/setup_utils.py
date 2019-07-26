@@ -158,15 +158,16 @@ def diff_last_files():
 	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
 
 	# Open both files (read mode) and remove commas from every line
+	today_f_commas = open(today_file_loc, "r").readlines()
 	try:
-		today_f_commas = open(today_file_loc, "r").readlines()
 		yesterday_f_commas = open(yesterday_file_loc, "r").readlines()
 	except:
-		print("File not found, could not diff files\nCheck archives dir")
-		return "File not found"
+		print("Yesterday's file not found, could not diff files")
+		return "Yesterday not found"
 	today_lines = [l.replace(",", "") for l in today_f_commas]
 	yesterday_lines = [l.replace(",", "") for l in yesterday_f_commas]
-	# Print only the diff-ing lines
+	# Print only the diff-ing lines, below progress bar
+	print("\n")
 	for line in difflib.ndiff(yesterday_lines, today_lines):
 		if(line[0] != " "):  # diff-ing lines start with non-space
 			print(line)
