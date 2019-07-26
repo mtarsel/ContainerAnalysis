@@ -10,7 +10,6 @@ from utils.setup_utils import travis_trial
 def test_travis_1():
 	assert(travis_trial() == True)
 
-
 #test get_repo_pages from crawler
 def test_get_repo_pages_10():
         assert(get_repo_pages(10) == 1)
@@ -44,11 +43,11 @@ def test_progress_bar_385_745():
 
 #test parse_creds function from setup_utils
 def test_parse_creds():
-	assert(parse_creds("docs/test_user.yaml")[0].regis == "hub.docker.com")
+	assert(parse_creds("docs/test_user.yaml")[0].regis=="hub.docker.com")
 
 
 #test parse_index_yaml from setup_utils
 def test_parse_index_yaml():
-	app_list, need_keywords_list = parse_index_yaml("docs/test_index.yaml")
+	app_list, need_keywords_list=parse_index_yaml("docs/test_index.yaml")
 	assert(app_list[0].name == "ibm-ace-dashboard-dev")
 	assert(need_keywords_list == [])

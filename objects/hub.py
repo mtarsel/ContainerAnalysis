@@ -3,8 +3,9 @@ import json
 import base64
 
 class Hub:
-	"""An object to connect to dockerhub. Does not store username or password.
-	Any user information will be entered at execution.
+	"""An object to connect to dockerhub. 
+	   Does not store username or password.
+	   Any user information will be entered at execution.
 	"""
 	def __init__(self, regis, uname, upass):
 		self.regis = regis
