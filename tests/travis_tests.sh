@@ -23,21 +23,23 @@ check_num_rows () {
 }
 
 #test different args to get-image-info
-python get-image-info.py user.yaml
+python get-image-info.py docs/test_user.yaml
 check_num_columns
 check_num_rows
 
-python get-image-info.py user.yaml --debug
+python get-image-info.py docs/test_user.yaml --debug
 check_num_columns
 check_num_rows
 
-python get-image-info.py user.yaml --keep
+python get-image-info.py docs/test_user.yaml --keep
 check_num_columns
 check_num_rows
 
-python get-image-info.py user.yaml --test ibm-cam
+python get-image-info.py docs/test_user.yaml --test ibm-cam
 check_num_columns
 check_num_rows
+
+python get-image-info.py --help
 
 #tests if container-output.log exists
 if [ ! -f container-output.log ]; then exit 1; fi
