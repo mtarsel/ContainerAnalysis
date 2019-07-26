@@ -28,8 +28,5 @@ def test_make_image():
 	new_image.add_tag("do")
 	assert(len(new_image.tags) == 1)
 
-	new_image.add_data("that")
-	assert(len(new_image.data) == 1)
-
 	new_image.add_arch("the_game")
 	assert(len(new_image.archs) == 1)
