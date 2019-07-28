@@ -313,39 +313,48 @@ from index.yaml', self.name)
 			final_repo = 'hub.docker.com/' + org + '/' + container
 			logging.warning('%s: %s  %s ', 
 					self.name, 
-					name, final_repo)
+					name, 
+					final_repo)
+			
 			regis = 'hub.docker.com/' 
-			#TODO - add more repos. 
-			#this is why hub obj is not really utilized
-			for obj in hub_list: 
+			#TODO - add more repos. this is why hub obj is not 
+			#really utilized
+
+			for obj in hub_list:
 			#only authorize the regis for the image we want
 				if regis == obj.regis:
 					obj.token_auth()
 					image_obj.header = obj.header
 					break
-			image_obj.get_image_tag_count(regis)
-			if (image_obj.num_tags > 100):
-				"""since we use a iterator to store tag name 
-				   along with data, if there is more than 100 
-				   tags than no data is stored. we only need 1 
-				   container to get arch, we still get all the 
-				   data we want
-				"""
-				logging.warning('more than 100 tags. Querying \
-several pages')
-				image_obj.get_alot_image_tag_names(regis)
-				#this function also gets arch for the image.
-				logging.warning('no data stored in image_obj')
-				# we can only get 100 tag names per page
-			if(image_obj.num_tags < 99 and image_obj.num_tags > 0):
-				# also gets arch for the image.
-				image_obj.get_image_tag_names(regis)
-			if image_obj.container in image_obj.tags:
-				image_obj.is_container = True
-				#now the container is part of image_obj
-				image_obj.get_archs(regis, image_obj.container)
+
+			#This is the url we'll query for all the dockerhub info
+			image_url = ('https://' + regis + '/v2/repositories/'
+			             + image_obj.org + '/' + image_obj.name
+				     + '/tags/?page=1&page_size=100')
+
+			# Continue to look at urls for tags until next == none
+			while (image_url is not None):
+				image_obj.request_data(image_url)
+				if (image_obj.exist_in_repo):
+					image_obj.get_image_tag_names()
+					# If dealing w/ container and haven't 
+					#gotten archs
+					if (image_obj.container in \
+					image_obj.tags
+								and len\
+								(image_obj.\
+								archs) == 0):
+						image_obj.is_container = True
+						# Now the container is part of 
+						#image_obj
+						image_obj.get_archs()
+					image_url = image_obj.requested_data\
+						    ["next"]
+				else:
+					image_url = None
+
+			# From here, all the vars are set for the output.
 			self.sub_images.append(image_obj)
-			#From here, all the vars are set for the output.
 
 	def output_app_keywords(self, f):
 		""" use keywords from App. no for loop so outputs only once"""
@@ -502,174 +511,76 @@ class Image:
 		self.header = ''
 		self.is_container = False#if container in tags -regex * works
 		self.exist_in_repo = True #if it doesnt exist, big problem!
+		self.requested_data = ''  # dict requested from dockerhub
 
 	def add_tag(self, tag_name):
 		self.tags.append(tag_name)
 
-	def add_data(self, new_data):
-		self.data.append(new_data)
-
 	def add_arch(self, arch_name):
 		self.archs.append(arch_name)
+	
+	# Given a url, get all the data from it
+	def request_data(self, url):
+		r = requests.get(url, headers=self.header)  # header from hub
+		logging.debug('%s %s %s', self.name, self.org, url)
 
-	#TODO: img
-	def get_image_tag_count(self, regis):
-		image_url = ('https://' 
-			     + regis 
-			     + '/v2/repositories/' 
-			     + self.org+'/'
-			     +self.name  
-			     + '/tags/?page=1&page_size=100')
-		r = requests.get(image_url, headers=self.header)
-		logging.debug('%s %s %s', self.name, self.org, image_url)
-
+		# Image is not in this org - big problem!!!
 		if r.status_code == 404:
 			logging.critical('image: %s does not exist in %s \
 organization', self.name, self.org)
-			logging.critical(image_url)
+			logging.critical(url)
 			#TODO find_image(self, regis)
-			# image is not in this org. big problem!!!
 			self.is_container = False
 			self.is_multiarch = False
 			self.is_ppc64le = False
 			self.num_tags = 0
 			self.exist_in_repo = False
-			return self.num_tags
+			return
+
 		r.raise_for_status()
-		# turns the reply into JSON containing dict of strings
+		# Turns the reply into JSON containing dict of strings
 		data = json.loads(r.text)
-		self.num_tags = int(data["count"])
-		logging.info('image: %s Tags=%d organization=%s', 
-			self.name, self.num_tags, self.org)
-		return self.num_tags
+		self.requested_data = data
 
-	def get_alot_image_tag_names(self, regis):
-		"""more than 100 tagsif there is more than 1 pages than we have
-		   to iterate thru all page_size since there is only 100 images
-		   per page
-		"""
-		#number of pages to query
-		image_pages = get_repo_pages(int(self.num_tags))
-		for i in range(1,image_pages+1):
-			image_url = ('https://' 
-				     + regis 
-				     + '/v2/repositories/' 
- 				     + self.org 
-				     + '/'
-				     + self.name 
-				     +'/tags/?page='
-				     + str(i) +'&page_size=100')
-			logging.debug('Trying %s', image_url)
-			r = requests.get(image_url, headers=self.header)
-			r.raise_for_status()
-			data = json.loads(r.text)
-			# we have 100 images EXCEPT on last page.
-			if i == image_pages:
-				tag_extra = int(self.num_tags % 100) 
-				for j in range(tag_extra):
-					tag_name = data["results"][j]["name"]
-					self.add_tag(tag_name)
-					 #TODO 
-					 #self.get_image_tag(regis, header, j)
-				break # last page so no more repos.
-			for j in range(100): 
-				tag_name = data["results"][j]["name"]
-				self.add_tag(tag_name)
-				#TODO self.get_image_tag(regis, header, j)
-
-	def get_image_tag_names(self, regis):
-		""" Gets the name of the tags for an image. use tag name to 
-		    request more specific info
-
-		    Also set arch values
-		"""
-		image_url = ('https://' 
-			     + regis 
-			     + '/v2/repositories/' 
-			     + self.org 
-			     + '/'+ self.name 
-			     + '/tags/?page=1&page_size=100')
-		logging.debug('get_image_tag_names: %s', image_url)
-		r = requests.get(image_url, headers=self.header)
-		r.raise_for_status()
-		data = json.loads(r.text)
-		if (self.num_tags == 0): # double check to avoid failure
+	# Uses dockerhub data to get names of tags
+	def get_image_tag_names(self):
+		if (self.num_tags == 0):  # double check to avoid failure
 			logging.critical('There is no tags for %s', self.name)
-		for i in range(self.num_tags):
-			tag_name = data["results"][i]["name"]
+		# results: field in data holds all tag info as list of dicts
+		results = self.requested_data["results"]
+		for tag in results:
+			tag_name = tag["name"]
 			self.add_tag(tag_name)
-			self.get_image_tag(regis, i)
 			logging.info('get_image_tag_names: image name: %s tag:\
- %s', self.name, self.tags[i])
+ %s',
+							self.name, \
+							self.tags[-1])
 
-	def get_archs(self, regis, image_tag_name):
-		"""determine if specific image tag is multiarch.
-	       	   iterate over all the archs and add them to the objects 
-		   list of archs
-
-		   Also check if ppc64le is in the list of archs.
+	# Uses dockerhub data to get archs for specific image (container)
+	def get_archs(self):
+		""" determine if specific image tag is multiarch.
+			iterate over all the archs and add them to the 
+			objects list of archs
 		"""
-		tag_url = ('https://' 
-			   + regis 
-			   + '/v2/repositories/' 
-			   + self.org 
-			   + '/'+ self.name 
-			   + '/tags/' 
-			   + image_tag_name + '/')
-		r = requests.get(tag_url, headers=self.header)
-		r.raise_for_status()
-		data = json.loads(r.text)
-		self.num_archs = len(data["images"])
-		if self.num_archs == 1: 
+		# results: field in data holds all tag info as list of dicts
+		results = self.requested_data["results"]
+		# Search results for tag where name is same as container
+		wanted_tag = next(tag for tag in results
+			     if tag["name"] == self.container)
+		self.num_archs = len(wanted_tag["images"])
+
+		if self.num_archs == 1:  # I have one arch so ill take it
 			self.is_multiarch = False
-			self.add_arch(data["images"][0]["architecture"])
+			self.add_arch(wanted_tag["images"][0]["architecture"])
 		else:
 			self.is_multiarch = True
 			for arch_name in range(self.num_archs):
-				self.add_arch(data["images"][arch_name]\
-				["architecture"])
+				self.add_arch(wanted_tag["images"][arch_name]\
+					      ["architecture"])
+
 				if 'ppc64le' in self.archs:
 					self.is_ppc64le = True
 				if 'amd64' in self.archs:
 					self.is_amd64 = True
 				if 's390x' in self.archs:
 					self.is_s390x = True
-
-	def get_image_tag(self, regis, itr):
-		"""Get the image tag info. the request page contains all the 
-		   info we can get about a specific tag for an image.
-
-	           Get the number of architectures here because that is 
-		   specific image tag info.
-
-		   Add arch num and arch names to object.
-		"""
-		tag_url = ('https://' 
-			   + regis 
-			   + '/v2/repositories/' 
-			   + self.org + '/' 
-			   + self.name +'/tags/'
-			   + self.tags[itr] + '/')
-		logging.debug('get_image_tag: %s tag:%s %s',
-			      self.name, self.tags[itr], tag_url)
-		r = requests.get(tag_url, headers=self.header)
-		r.raise_for_status()
-		#this list of data contains ALL the info about each tag 
-		#on 1 webpage.
-		self.add_data(json.loads(r.text))
-		logging.debug('get_image_tag: tag name:%s  %s', 
-			      self.tags[itr], self.data[itr])
-		#print(pp_json(data))
-
-
-# class ImageTag:
-# 	#imageTagLatest:
-# 	"""An object for a specific image tag. Eventually this will contain the
-# 	'latest' tag.
-# 	 This is benefical because there is a list of architectures and nicely
-# 	 stores in the info stored in the image object data attribute"""
-# 	name
-# 	num_archs
-# 	archs =
-# 	size =
-# 	last_updated

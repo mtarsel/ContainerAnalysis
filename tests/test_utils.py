@@ -1,10 +1,9 @@
 import pytest
+from datetime import datetime, timedelta
 
 from utils.crawler import get_repo_pages
-from utils.setup_utils import progress_bar
-from utils.setup_utils import parse_creds
-from utils.setup_utils import parse_index_yaml
-from utils.setup_utils import travis_trial
+from utils.setup_utils import progress_bar, parse_creds, travis_trial
+from utils.setup_utils import parse_index_yaml, diff_last_files
 
 #Just a sanity check, if this fails, something is VERY wrong
 def test_travis_1():
@@ -51,3 +50,18 @@ def test_parse_index_yaml():
 	app_list, need_keywords_list=parse_index_yaml("docs/test_index.yaml")
 	assert(app_list[0].name == "ibm-ace-dashboard-dev")
 	assert(need_keywords_list == [])
+
+
+#test diff_last_files from setup.utils
+def test_diff_last_files_no_yesterday():
+	assert(diff_last_files() == "Yesterday not found")
+
+def test_diff_last_files_blank_yesterday():
+	# Create a blank yesterday results file, just to test
+	yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
+	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
+	yesterday_file = open(yesterday_file_loc, "w+")
+	yesterday_file.close()
+
+	assert(diff_last_files() == "Finished properly")
+
