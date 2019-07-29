@@ -19,6 +19,11 @@ def test_make_app():
 	new_app.verify()
 	assert(new_app.is_bad == True)
 
+	fake_data = {"im": { "architectures" : []}}
+	assert(new_app.matches_dashboard(fake_data))
+
+	assert(new_app.matches_dashboard(None))
+
 
 #test __init__ from objects.image.Image
 def test_make_image():
