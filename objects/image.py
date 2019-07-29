@@ -14,7 +14,7 @@ class App:
 	"""This is the App Name but easier to use mainimage, subimage for 
 	   documentation. These attributes will be from values.yaml 
 	   (from github) but name is derived from the big index.yaml file. 
-	   Keywords are taken from Chart.yaml which is not saved anywhere.
+	   Keywords are taken from Chart.yaml which is saved in Applications
 	"""
 	def __init__(self, name, url):
 		self.name = name
