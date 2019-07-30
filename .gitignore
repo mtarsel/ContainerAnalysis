@@ -5,6 +5,7 @@ Applications/
 *.swp
 generated_input.yaml
 archives/
+dash-charts.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
