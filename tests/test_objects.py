@@ -19,6 +19,11 @@ def test_make_app():
 	new_app.verify()
 	assert(new_app.is_bad == True)
 
+	fake_data = {"im": { "architectures" : []}}
+	assert(new_app.matches_dashboard(fake_data))
+
+	assert(new_app.matches_dashboard(None))
+
 
 #test __init__ from objects.image.Image
 def test_make_image():
@@ -27,9 +32,6 @@ def test_make_image():
 
 	new_image.add_tag("do")
 	assert(len(new_image.tags) == 1)
-
-	new_image.add_data("that")
-	assert(len(new_image.data) == 1)
 
 	new_image.add_arch("the_game")
 	assert(len(new_image.archs) == 1)

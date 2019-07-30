@@ -2,9 +2,12 @@ import logging
 import argparse
 import yaml
 import urllib
+from datetime import datetime, timedelta
 import sys
 import os
 import errno
+import difflib
+from json import load
 
 from datetime import datetime
 from objects.hub import Hub
@@ -34,16 +37,16 @@ def mkdir_p(path):
 #prints a progress bar as a process runs with
 #how many items are complete, how many need to complete,
 #and the length of the bar on the screen
-def progress_bar(num, total, length=50):
+def progress_bar(num, total, start_time, length=50):
 	#get decimal and integer percent done
 	proportion = num / total
 	percent = int(proportion * 100)
 	#get number of octothorpes to display
 	size = int(proportion * length)
+	# Get runtime to display
+	runtime = str(datetime.now() - start_time)
 	#display [###   ] NN% done
-	display = ('[' + ('#' * size) 
-		   + (' ' * (length - size)) + '] ' 
-		   + str(percent) + '% done')
+	display = '[' + ('#' * size) + (' ' * (length - size)) + '] ' + str(percent) + '% done ' + runtime
 	#write with stdout to allow for in-place printing
 	sys.stdout.write(display)
 	sys.stdout.flush()
@@ -80,9 +83,9 @@ information about images from DockerHub")
 	args = parser.parse_args()
 	logging.getLogger("requests").setLevel(logging.WARNING) 
 	# let argparse do the work for us
-	logging.basicConfig(level=args.loglevel,
-			    filename='container-output.log',
-			    format='%(levelname)s:%(message)s')
+	logging.basicConfig(level=args.loglevel,filename='container-output.log',
+						format='%(asctime)s ~ %(levelname)s:\n%(message)s\n')
+
 	return args
 
 
@@ -150,9 +153,8 @@ charts/master/stable/{}/".format(app_name)
 
 
 def setup_output_file():
-	""" Initialize the Image object and add tags, repos, and archs to 
-	image obj.Once Image obj is setup, add it to a sublist of App obj. This
-	 function will call output_CSV() for each App from the helm chart."""
+	"""Creates and returns file object for writing results"""
+	
 	#set up file name, make directory if it doesn't exist
 	date = datetime.today().strftime("%d-%b-%Y")	#16-Jul-2019
 	results_file_loc = "archives/results-{}.csv".format(date)
@@ -162,3 +164,45 @@ def setup_output_file():
 	f.write("Product,App,amd64,ppc64le,s390x,Images,Container,amd64,\
 ppc64le,s390x,Tag Exists?\n")
 	return f
+
+def diff_last_files():
+	"""Opens today's file and yesterday's, reads the lines, then
+		returns the difference between (if there is a difference)
+	"""
+
+	# Set up file names for today and yesterday
+	today = datetime.today().strftime("%d-%b-%Y")  # 26-Jul-2019
+	today_file_loc = "archives/results-{}.csv".format(today)
+	yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
+	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
+
+	# Open both files (read mode) and remove commas from every line
+	today_f_commas = open(today_file_loc, "r").readlines()
+	try:
+		yesterday_f_commas = open(yesterday_file_loc, "r").readlines()
+	except:
+		print("\nYesterday's file not found, could not diff files")
+		return "Yesterday not found"
+	today_lines = [l.replace(",", "") for l in today_f_commas]
+	yesterday_lines = [l.replace(",", "") for l in yesterday_f_commas]
+	# Print only the diff-ing lines, below progress bar
+	print("\n")
+	for line in difflib.ndiff(yesterday_lines, today_lines):
+		if(line[0] != " "):  # diff-ing lines start with non-space
+			print(line)
+	return "Finished properly"
+
+def get_dashboard_json():
+	""" Tries to return a dict from dash-charts.json, if it exists.
+		If it doesn't exist, None is returned and caught later
+	"""
+
+	try:
+		dash_json_f = open("dash-charts.json", "r")
+		dash_dict = load(dash_json_f)
+		return dash_dict
+	except:
+		print("No dash-charts.json found in directory")
+		print("Disregard 'CONFLICTS' section at end of printout")
+		return None
+
