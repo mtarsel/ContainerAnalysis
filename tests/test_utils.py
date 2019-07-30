@@ -1,4 +1,4 @@
-mport pytest
+import pytest
 from datetime import datetime, timedelta
 
 from utils.crawler import get_repo_pages
