@@ -2,14 +2,13 @@ import logging
 import argparse
 import yaml
 import urllib
-from datetime import datetime, timedelta
 import sys
 import os
 import errno
 import difflib
 from json import load
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from objects.hub import Hub
 from objects.image import App
 
@@ -85,7 +84,6 @@ information about images from DockerHub")
 	# let argparse do the work for us
 	logging.basicConfig(level=args.loglevel,filename='container-output.log',
 						format='%(asctime)s ~ %(levelname)s:\n%(message)s\n')
-
 	return args
 
 
@@ -154,7 +152,6 @@ charts/master/stable/{}/".format(app_name)
 
 def setup_output_file():
 	"""Creates and returns file object for writing results"""
-	
 	#set up file name, make directory if it doesn't exist
 	date = datetime.today().strftime("%d-%b-%Y")	#16-Jul-2019
 	results_file_loc = "archives/results-{}.csv".format(date)
@@ -169,13 +166,11 @@ def diff_last_files():
 	"""Opens today's file and yesterday's, reads the lines, then
 		returns the difference between (if there is a difference)
 	"""
-
 	# Set up file names for today and yesterday
 	today = datetime.today().strftime("%d-%b-%Y")  # 26-Jul-2019
 	today_file_loc = "archives/results-{}.csv".format(today)
 	yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
 	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
-
 	# Open both files (read mode) and remove commas from every line
 	today_f_commas = open(today_file_loc, "r").readlines()
 	try:
