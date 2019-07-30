@@ -7,9 +7,9 @@ from datetime import datetime
 from utils.setup_utils import *
 
 
-def main(args):
-	# storage variables
-	creds_file_loc = str(os.getcwd() + "/" + args.user.name)	
+def main(args, start_time):
+	#storage variables
+	creds_file_loc = str(os.getcwd() + "/" + args.user.name)
 	if logging.getLogger().level == logging.DEBUG:
 		# write a yaml file to easily see exactly what info 
 		# about each container in the App was parsed
@@ -25,14 +25,14 @@ def main(args):
 	output_f = setup_output_file()
 	# if we don't want to keep and use the old values.yaml
 	if (args.keep_files is not True):
-		# cleanup from last run
-		shutil.rmtree(str(os.getcwd() + "/Applications"), 
-			             ignore_errors=True)
+		#cleanup from last run
+		shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
+	dash_dict = get_dashboard_json()
 	num_tracker = 0
 	# for each app, get a lot of info on them
 	for app in app_list:
 		num_tracker += 1
-		progress_bar(num_tracker, len(app_list), 50)
+		progress_bar(num_tracker, len(app_list), start_time, 50)
 		dest_dir = "{}/Applications/{}/".format(os.getcwd(), app.name)
 		mkdir_p(dest_dir)  	# Create the Applications/app/ dir
 		app.get_product_name(dest_dir)
@@ -51,25 +51,25 @@ def main(args):
 		app.output_CSV(output_f)
 		if logging.getLogger().level == logging.DEBUG:
 			app.generate_output()
-
 	output_f.close()
-
 	diff_last_files()
-
-	# TODO - output names of bad apps at end of log
-	print("\n========\n")
+	print("\n==== CONFLICT WITH DASHBOARD ====\n")
+	for app in app_list:
+		if not app.matches_dashboard(dash_dict):
+			print(app.name)
+	print("\n==== BAD APPS ====\n")
 	i = 0
 	for app in app_list:
-		if app.is_bad is True:
+		if app.is_bad:
 			i += 1
 			print(app.name)
-	print(i)
+	print("Total: {}".format(i))
 
 
 if __name__ == "__main__":
 	start_time = datetime.now()
 	args = setup_logging()
-	main(args)
+	main(args, start_time)
 	end_time = datetime.now()
 	print("Time to run program: {}".format(end_time - start_time))
 

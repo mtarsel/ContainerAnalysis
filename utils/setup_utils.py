@@ -6,6 +6,7 @@ import sys
 import os
 import errno
 import difflib
+from json import load
 
 from datetime import datetime, timedelta
 from objects.hub import Hub
@@ -35,16 +36,16 @@ def mkdir_p(path):
 #prints a progress bar as a process runs with
 #how many items are complete, how many need to complete,
 #and the length of the bar on the screen
-def progress_bar(num, total, length=50):
+def progress_bar(num, total, start_time, length=50):
 	#get decimal and integer percent done
 	proportion = num / total
 	percent = int(proportion * 100)
 	#get number of octothorpes to display
 	size = int(proportion * length)
+	# Get runtime to display
+	runtime = str(datetime.now() - start_time)
 	#display [###   ] NN% done
-	display = ('[' + ('#' * size) 
-		   + (' ' * (length - size)) + '] ' 
-		   + str(percent) + '% done')
+	display = '[' + ('#' * size) + (' ' * (length - size)) + '] ' + str(percent) + '% done ' + runtime
 	#write with stdout to allow for in-place printing
 	sys.stdout.write(display)
 	sys.stdout.flush()
@@ -81,9 +82,8 @@ information about images from DockerHub")
 	args = parser.parse_args()
 	logging.getLogger("requests").setLevel(logging.WARNING) 
 	# let argparse do the work for us
-	logging.basicConfig(level=args.loglevel,
-			    filename='container-output.log',
-			    format='%(levelname)s:%(message)s')
+	logging.basicConfig(level=args.loglevel,filename='container-output.log',
+						format='%(asctime)s ~ %(levelname)s:\n%(message)s\n')
 	return args
 
 
@@ -176,7 +176,7 @@ def diff_last_files():
 	try:
 		yesterday_f_commas = open(yesterday_file_loc, "r").readlines()
 	except:
-		print("Yesterday's file not found, could not diff files")
+		print("\nYesterday's file not found, could not diff files")
 		return "Yesterday not found"
 	today_lines = [l.replace(",", "") for l in today_f_commas]
 	yesterday_lines = [l.replace(",", "") for l in yesterday_f_commas]
@@ -186,4 +186,18 @@ def diff_last_files():
 		if(line[0] != " "):  # diff-ing lines start with non-space
 			print(line)
 	return "Finished properly"
+
+def get_dashboard_json():
+	""" Tries to return a dict from dash-charts.json, if it exists.
+		If it doesn't exist, None is returned and caught later
+	"""
+
+	try:
+		dash_json_f = open("dash-charts.json", "r")
+		dash_dict = load(dash_json_f)
+		return dash_dict
+	except:
+		print("No dash-charts.json found in directory")
+		print("Disregard 'CONFLICTS' section at end of printout")
+		return None
 

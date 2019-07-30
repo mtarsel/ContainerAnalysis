@@ -34,19 +34,23 @@ def test_get_repo_pages_1000():
 
 # test progress_bar function from setup_utils
 def test_progress_bar_1_100():
-	assert(progress_bar(1, 100) == 1)
+	start_time = datetime.now()
+	assert(progress_bar(1, 100, start_time) == 1)
 
 
 def test_progress_bar_1_50():
-	assert(progress_bar(1, 50) == 2)
+	start_time = datetime.now()
+	assert(progress_bar(1, 50, start_time) == 2)
 
 
 def test_progress_bar_466_693():
-	assert(progress_bar(466, 693) == 67)
+	start_time = datetime.now()
+	assert(progress_bar(466, 693, start_time) == 67)
 
 
 def test_progress_bar_385_745():
-	assert(progress_bar(385, 745) == 51)
+	start_time = datetime.now()
+	assert(progress_bar(385, 745, start_time) == 51)
 
 
 # test parse_creds function from setup_utils

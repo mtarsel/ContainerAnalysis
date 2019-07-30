@@ -23,16 +23,21 @@ class App:
 		# all the images for Main image. for output_CSV()
 		self.sub_images = [] 
 		self.keywords = []
-		self.repos = []   # not parsed
-		self.tags = []
-		self.images = []
-		self.clean_repos = []  # sanitized
-		# something did't parse correctly so its causing problems
-		self.is_bad = False
-		self.product_name = ''  # taken from README file of app
+		self.repos = [ ] #not parsed
+		self.tags = [ ]
+		self.images = [ ]
+		self.clean_repos = [ ] #sanitized
+		self.values_exists = False
+		self.Charts_exists = False
+		self.is_bad = False # something did't parse correctly so its causing problems
+		self.product_name = '' #taken from README file of app
+		self.archs = []
+
 
 	def add_keyword(self, keyword):
 		self.keywords.append(keyword)
+		if (keyword in ['amd64', 'ppc64le', 's390x']):
+			self.archs.append(keyword)
 
 	def verify(self):
 		"""iterate thru an App's sub images to make sure we have all 
@@ -229,7 +234,7 @@ from {}".format(self.name, readme_url))
 							 document=\
 							 chart_yaml_doc)
 				for key in keywords[0]:
-					self.add_keyword(key)
+					self.add_keyword(key)		
 
 	def clean_image_repo(self):
 		"""from list of repo strings, get image names and repos.
@@ -356,6 +361,15 @@ from index.yaml', self.name)
 
 			# From here, all the vars are set for the output.
 			self.sub_images.append(image_obj)
+
+	def matches_dashboard(self, dashboard_file):
+		if (dashboard_file is not None):
+			archs_from_dash = dashboard_file[self.name]["architectures"]
+			archs_from_dash.sort()
+			self.archs.sort()
+			return self.archs == archs_from_dash
+		else:
+			return True
 
 	def output_app_keywords(self, f):
 		""" use keywords from App. no for loop so outputs only once"""
