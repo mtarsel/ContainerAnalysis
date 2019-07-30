@@ -66,7 +66,12 @@ def setup_logging():
 
 	parser.add_argument("-i", "--index", help="A index.yaml file from a Helm Chart", type=argparse.FileType('r'))
 
-	parser.add_argument("-k", "--keep", help="Keeps old values and chart files", action="store_true", dest="keep_files")
+	parser.add_argument("-k", "--keep", help="Keeps and uses old values and chart files",
+						action="store_true", dest="keep_files")
+
+	parser.add_argument("-l", "--local",
+						help="Skip dockerhub requests, use local data",
+						action="store_true", dest="skip_dockerhub")
 
 	parser.add_argument("-t", "--test", help="tests a list of specific app names (1 or more input(s))", nargs='+', dest="test_names")
 		

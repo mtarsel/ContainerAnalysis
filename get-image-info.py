@@ -27,7 +27,7 @@ def main(args, start_time):
 	output_f = setup_output_file()
 
 	#if we don't want to keep and use the old values.yaml
-	if (args.keep_files is not True):
+	if ((args.keep_files or args.skip_dockerhub) is not True):
 		#cleanup from last run
 		shutil.rmtree(str(os.getcwd() + "/Applications"), ignore_errors=True)
 
@@ -56,7 +56,7 @@ def main(args, start_time):
 		app.parse_values_yaml(dest_dir)
 		app.clean_image_repo()
 
-		app.repo_crawl(hub_list)
+		app.repo_crawl(hub_list, args.skip_dockerhub)
 		app.output_app_keywords(output_f)
 		app.output_CSV(output_f)
 
