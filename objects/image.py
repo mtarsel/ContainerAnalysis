@@ -4,11 +4,9 @@ import logging
 import urllib
 import re
 import yaml
-
+from os import getcwd
+from json import dump, load
 from nested_lookup import nested_lookup
-from utils.crawler import find_image
-from utils.crawler import get_repo_pages
-
 
 class App:
 	"""This is the App Name but easier to use mainimage, subimage for 
@@ -242,7 +240,9 @@ from {}".format(self.name, readme_url))
 		container in the App was parsed
 		"""
 		
-	def repo_crawl(self, hub_list):
+
+
+	def repo_crawl(self, hub_list, skip_dockerhub=False):
 		""" Initialize the Image object and add tags, repos, and archs 
 		    to image obj. Once Image obj is setup, add it to a sublist 
 		    of App obj. This function will call output_CSV() for each 
@@ -250,6 +250,7 @@ from {}".format(self.name, readme_url))
 		"""
 		# this list contains apps which repo/org is ppc64le 
 		# and not ibmcom
+
 		ppc64_list = [ 
 			"rabbitmq",
 			"open-liberty",
@@ -264,9 +265,11 @@ from {}".format(self.name, readme_url))
 			"ibmcorp/db2_developer_c",
 			"ibmcorp/db2_developer_c"
 		]
+
 		# make sure app and images have all the info we need. 
 		# if not, its print it out
 		self.verify() 
+
 		for i in range(len(self.images)):
 			# TODO since we output CSV during crawling, 
 			# this check does not happen in testit()
@@ -307,9 +310,24 @@ from index.yaml', self.name)
 			             + image_obj.org + '/' + image_obj.name
 				     + '/tags/?page=1&page_size=100')
 
+			page_num = 1  # Used for tracking saved files
+			clean_name = name.replace("/", "")
+
 			# Continue to look at urls for tags until next == none
-			while image_url is not None:
-				image_obj.request_data(image_url)
+			while (image_url is not None):
+				file_name = (getcwd() + "/Applications/" + self.name
+								+ "/{}-{}-{}.json".format(org, clean_name, page_num))
+				if skip_dockerhub:
+					with open(file_name, "r") as json_file:
+						loaded_data = load(json_file)
+						if len(loaded_data) is 0:
+							image_obj.exist_in_repo = False
+							break
+						image_obj.requested_data = loaded_data
+				else:
+					image_obj.request_data(image_url)
+					with open(file_name, "w+") as json_file:
+						dump(image_obj.requested_data, json_file)
 				if (image_obj.exist_in_repo):
 					image_obj.get_image_tag_names()
 					# If dealing w/ container and haven't 
@@ -325,6 +343,8 @@ from index.yaml', self.name)
 						        ["next"]
 				else:
 					image_url = None
+
+				page_num += 1
 
 			# From here, all the vars are set for the output.
 			self.sub_images.append(image_obj)

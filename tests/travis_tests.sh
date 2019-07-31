@@ -35,6 +35,14 @@ python get-image-info.py docs/test_user.yaml --keep
 check_num_columns
 check_num_rows
 
+python get-image-info.py docs/test_user.yaml --local
+check_num_columns
+check_num_rows
+
+python get-image-info.py docs/test_user.yaml -kl
+check_num_columns
+check_num_rows
+
 python get-image-info.py docs/test_user.yaml --test ibm-cam
 check_num_columns
 check_num_rows
