@@ -96,128 +96,104 @@ from {}".format(self.name, readme_url))
 
 	def parse_values_yaml(self, dir_loc):
 		file_loc = dir_loc + "values.yaml"
+
 		with open(file_loc, 'r') as values:
 			yaml_doc = yaml.safe_load(values)
-		# results from this will contain repository results
-		image_results = nested_lookup(key='image', 
-					      document=yaml_doc, wild=True, 
-					      with_keys=True)
-		tag_from_image = nested_lookup(key='tag', 
-					       document=image_results, 
-					       wild=True)
+
+		#results from this will contain repository results
+		image_results = nested_lookup(key='image', document=yaml_doc, wild=True, with_keys=True)
+
+		tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
+
 		if self.name == "ibm-microclimate":
-			tag_from_image = [item for sublist in tag_from_image \
-			for item in sublist]
-		if self.name == "ibm-reactive-platform-lagom-sample" or \
-		self.name == "ibm-eventstreams-rhel-dev":
-			# this app contains a large list comprised of 
-			# another list and a dict
-			# all the tags are the same so grab first value in dict
+			tag_from_image = [item for sublist in tag_from_image for item in sublist]
+
+		if self.name == "ibm-reactive-platform-lagom-sample" or self.name == "ibm-eventstreams-rhel-dev":
+			#this app contains a large list comprised of another list and a dict
+			#all the tags are the same so grab teh first value in the dict
 			for tag in tag_from_image:
 				if type(tag) is dict:
 					for k,v in tag.items():
 						tag_from_image = v
+
 		# add the tags to app obj
 		if (len(tag_from_image) > 0):
 			if self.name == "ibm-eventstreams-dev":
-				# the first member of the list is a dict
+				#the first member of the list is a dict so get it
 				tag_dict = tag_from_image[0]
-				for image, tag in tag_dict.items():
+
+				for image,tag in tag_dict.items():
 					self.tags = str(tag)
 			else:
 				self.tags = tag_from_image
-		repo_from_image = nested_lookup(key='repository', 
-						document=image_results, 
-						wild=True)
-		# ibm-ace-server-dev is getting a dict in a list 
-		# as the repo_from_image
+
+		repo_from_image = nested_lookup(key='repository', document=image_results, wild=True)
+
+		#ibm-ace-server-dev is getting a dict in a list as the repo_from_image
 		if self.name == "ibm-ace-server-dev":
-			# the format we get is {image: repo}
+			#the format we get is {image: repo}
 			ace_server_dict = next(item for item in repo_from_image)
-			for image, repo in ace_server_dict.items():
+			for image,repo in ace_server_dict.items():
 				self.images.append(str(image))
 				self.repos.append(str(repo))
 				self.clean_repos.append(str(repo))
 			if len(self.images) != len(self.tags):
-				# there is a single tag for all the images. 
-				# so add more tags
+				#there is a single tag for all the images. so add more tags
 				missing_tags = len(self.images) - len(self.tags)
 				for i in range(missing_tags):
 					self.tags.append(str(self.tags[0]))
+
 			return
+
 		if (len(repo_from_image) == 0):
-			repo_from_image = nested_lookup(key='name', 
-							document=image_results, 
-							wild=True)
+			repo_from_image = nested_lookup(key='name', document=image_results, wild=True)
 			if (len(repo_from_image) == 0):
-				repo_from_image = nested_lookup\
-						(key='imageName',
-						document=image_results, 
-						wild=True)
-				if len(repo_from_image) == 0:
-					repo_from_image = nested_lookup\
-                    (key='Image', document=image_results, 
-					 wild=True)	
-		# add repos to app obj
-		logging.info('%s Num of repos: %s', 
-			     self.name, 
-			     str(len(repo_from_image)))
+				repo_from_image = nested_lookup(key='imageName', document=image_results, wild=True)
+				if (len(repo_from_image) == 0):
+					repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
+
+		#add repos to app obj
+		logging.info('%s Num of repos: %s', self.name, str(len(repo_from_image)))
+
 		# add repos to app object
 		if len(repo_from_image) > 0:
 			for repo in repo_from_image:
-				# TODO for microclimate, this repo var is 
-				# actually a list of 2 repos along with 
-				# other lists
-				if isinstance(repo, list):
-				    # could be a sub list 
-				    # (ibm-microservicebuilder-pipeline)
+
+				#TODO for microclimate, this repo var is actually a list of 2 repos along with other lists
+				if isinstance(repo, list):#could be a sub list (ibm-microservicebuilder-pipeline)
 					for i in repo:
-						# print "\n repo is a list, has 
-						# member: " + str(i)
-						if type(i) is dict: 
-					    	# the image name may be a dict 
-					    	# so iterate
-					    	# print "\n repo is a DICT"
-                            			# typically this 
-    						# means all the 
-							# repos use one 
-							# tag_from_image
-							for k, v in i.items(): 
-								if "ibmcom" in \
-								str(v) and "/" \
-								in str(v):
-									if \
-									type(v)\
-									 is \
-									dict:
-										for j,l in v.items():
+						#print "\n repo is a list, has member: " + str(i)
+						if type(i) is dict: #the image name may be a dict so iterate
+						#	print "\n repo is a DICT"
+							for k,v in i.items(): 
+								if "ibmcom" in str(v) and "/" in str(v):
+									#typically this means all the repos use the same tag_from_image
+						#			print "\n DICT has ibmcom and slash " + str(v)
+									if type(v) is dict:
+						#				print "\n DICT_SUB_DICT!"
+										for j,l in v.items(): 
 											if "ibmcom" in str(l) and "/" in str(l):
 												self.repos.append(str(v))
-											else:
-												self.repos.append(str(v))
+									else:
+										self.repos.append(str(v))
+
 						if type(i) != dict:
-							if "ibmcom" in str(i) \
-							and "/" in str(i):
-								self.repos.\
-								append(str(i))
+							# it should be in format org/app_name MUST CONTAIN / (not a dict)
+							if "ibmcom" in str(i) and "/" in str(i):
+								self.repos.append(str(i))
 				else:
 					if '/' in str(repo):
-						# SEEMS LIKE THE BEST (ONLY) 
-						# WORKING EXAMPLES. repo aint a 
-						# sublist and has a slash
+						#SEEMS LIKE THE BEST (ONLY) WORKING EXAMPLES. repo aint a sublist and has a slash
 						logging.info('repo: %s', repo)
 						self.repos.append(repo)
 					else:
 						repo = "ibmcom/" + repo
 						self.repos.append(str(repo))
-						# TODO ibm-eventstreams-dev 
-						# lands here with "ibmcom" as 
-						# the repo!
-						# repo is not a list and has no 
-                			        # slash
+						#TODO ibm-eventstreams-dev lands here with "ibmcom" as the repo!
+						#repo is not a list and has no slash
 		else: 
-			print("\n Cannot locate any repos for images.\
- \n NADA! \n")
+			print("\n Cannot locate any repos for images. \n NADA! \n")
+
 
 	def parse_chart_yaml(self, dir_loc):
 		file_loc = dir_loc + "Chart.yaml"
