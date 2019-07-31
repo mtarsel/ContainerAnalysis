@@ -56,7 +56,7 @@ class App:
 				print("gotcha in verify()")
 			# iterate thru images in app and 
 			# set the app.is_bad var based on image info		
-			if image_obj.exist_in_repo is False:
+			if image_obj.exist_in_repo == False:
 		 		self.is_bad = True
 
 	def get_product_name(self, dest_dir):
@@ -71,11 +71,11 @@ class App:
 			# make regex string looking for "# " at the 
 			# beginning of a line
 			for line in readme_lines:  # search all of the lines
-				if (regex.search(line) is not None):
+				if (regex.search(line) != None):
 					# If the regex got a hit make product
 					# name a sanitize version of the line
-					self.product_name = line.replace\
-                    ('#', '').strip()
+					self.product_name = \
+					line.replace('#', '').strip()
 					return		
 		self.product_name = "NOT FOUND"
 		logging.critical("No product_name found in README for {} \
@@ -83,13 +83,13 @@ from {}".format(self.name, readme_url))
 
 	def get_chart_yaml(self, dest_dir):
 		chart_yaml_url = self.url + "Chart.yaml"
-        # base url + Chart
+        	# base url + Chart
 		dest_loc = dest_dir + "Chart.yaml"
 		# download file into applications directory
 		urllib.request.urlretrieve(chart_yaml_url, dest_loc)
 
 	def get_values_yaml(self, dest_dir):
-		values_yaml_url = self.url + "values.yaml" 
+		values_yaml_url = self.url + "values.yaml"
 		dest_loc = dest_dir + "values.yaml"
 		# download file into applications directory
 		urllib.request.urlretrieve(values_yaml_url, dest_loc)
@@ -106,7 +106,7 @@ from {}".format(self.name, readme_url))
 					       document=image_results, 
 					       wild=True)
 		if self.name == "ibm-microclimate":
-			tag_from_image = [item for sublist in tag_from_image 
+			tag_from_image = [item for sublist in tag_from_image \
 			for item in sublist]
 		if self.name == "ibm-reactive-platform-lagom-sample" or \
 		self.name == "ibm-eventstreams-rhel-dev":
@@ -145,11 +145,11 @@ from {}".format(self.name, readme_url))
 				for i in range(missing_tags):
 					self.tags.append(str(self.tags[0]))
 			return
-		if len(repo_from_image) == 0:
+		if (len(repo_from_image) == 0):
 			repo_from_image = nested_lookup(key='name', 
 							document=image_results, 
 							wild=True)
-			if len(repo_from_image) == 0:
+			if (len(repo_from_image) == 0):
 				repo_from_image = nested_lookup\
 						(key='imageName',
 						document=image_results, 
@@ -196,9 +196,6 @@ from {}".format(self.name, readme_url))
 											else:
 												self.repos.append(str(v))
 						if type(i) != dict:
-						    # it should be in format 
-    						# org/app_name MUST CONTAIN / 
-    						# (not a dict)
 							if "ibmcom" in str(i) \
 							and "/" in str(i):
 								self.repos.\
@@ -297,7 +294,7 @@ from {}".format(self.name, readme_url))
 		for i in range(len(self.images)):
 			# TODO since we output CSV during crawling, 
 			# this check does not happen in testit()
-			if self.is_bad is True:
+			if self.is_bad == True:
 				logging.warning('%s contains a weird image \
 from index.yaml', self.name)
 				break
@@ -325,7 +322,7 @@ from index.yaml', self.name)
 			# really utilized
 
 			for obj in hub_list:
-			    # only authorize the regis for the image we want
+			        # only authorize the regis for the image we want
 				if regis == obj.regis:
 					obj.token_auth()
 					image_obj.header = obj.header
@@ -335,23 +332,23 @@ from index.yaml', self.name)
 				     + '/tags/?page=1&page_size=100')
 
 			# Continue to look at urls for tags until next == none
-			while (image_url is not None):
+			while image_url is not None:
 				image_obj.request_data(image_url)
 				if (image_obj.exist_in_repo):
 					image_obj.get_image_tag_names()
 					# If dealing w/ container and haven't 
 					# gotten archs
-					if (image_obj.container in 
-					image_obj.tags
-								and len
-								(image_obj.\
-								archs) == 0):
+					if (image_obj.container in \
+					image_obj.tags and \
+					len(image_obj.archs) == 0):
 						image_obj.is_container = True
 						# Now the container is part of 
 						# image_obj
 						image_obj.get_archs()
 					image_url = image_obj.requested_data\
 						        ["next"]
+				else:
+					image_url = None
 
 			# From here, all the vars are set for the output.
 			self.sub_images.append(image_obj)
@@ -401,13 +398,13 @@ from index.yaml', self.name)
 
 	def output_CSV(self, f):
 		# TODO maybe verify here?
-		if self.is_bad is True:
+		if self.is_bad == True:
 			f.write(',,,,,Image is bad!\n')
 			return
 		for image_obj in self.sub_images:
 			if image_obj.is_amd64 and image_obj.is_ppc64le and \
 			image_obj.is_s390x:
-				if image_obj.is_container is True:
+				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,Y,Y,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
@@ -415,7 +412,7 @@ from index.yaml', self.name)
 					(image_obj.name, image_obj.container))
 			if image_obj.is_amd64 and image_obj.is_ppc64le \
 			and not image_obj.is_s390x:
-				if image_obj.is_container is True:
+				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,Y,N,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
@@ -423,7 +420,7 @@ from index.yaml', self.name)
 					(image_obj.name, image_obj.container))
 			if image_obj.is_amd64 and not image_obj.is_ppc64le \
 			and image_obj.is_s390x:
-				if image_obj.is_container is True:
+				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,N,Y,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
@@ -431,7 +428,7 @@ from index.yaml', self.name)
 					(image_obj.name, image_obj.container))
 			if image_obj.is_amd64 and not image_obj.is_ppc64le \
 			and not image_obj.is_s390x:
-				if image_obj.is_container is True:
+				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,N,N,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
@@ -439,7 +436,7 @@ from index.yaml', self.name)
 					(image_obj.name, image_obj.container))
 			if not image_obj.is_amd64 and image_obj.is_ppc64le \
 			and image_obj.is_s390x:
-				if image_obj.is_container is True:
+				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,N,Y,Y,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
@@ -447,7 +444,7 @@ from index.yaml', self.name)
 					(image_obj.name, image_obj.container))
 			if not image_obj.is_amd64 and image_obj.is_ppc64le \
 			and not image_obj.is_s390x:
-				if image_obj.is_container is True:
+				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,N,Y,N,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
@@ -455,12 +452,12 @@ from index.yaml', self.name)
 					(image_obj.name, image_obj.container))
 			if not image_obj.is_amd64 and not image_obj.is_ppc64le\
  			and not image_obj.is_s390x:
-				if image_obj.is_container is True:
+				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,N,N,N,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
-					if image_obj.exist_in_repo is False: 
-				    	# TODO could use app.is_bad??
+					if image_obj.exist_in_repo == False: 
+				    		# TODO could use app.is_bad??
 						self.is_bad = True
 						f.write(',,,,,%s NOT FOUND IN \
 REPO,%s,N,N,N,N\n' %(image_obj.name, image_obj.container))
@@ -522,11 +519,11 @@ class Image:
 		self.tags = []  # now tag[1] and data[1] give all the info
 		self.data = []
 		self.header = ''
-        # if container in tags -regex * works
+        	# if container in tags -regex * works
 		self.is_container = False
-        # if it doesnt exist, big problem!
+        	# if it doesnt exist, big problem!
 		self.exist_in_repo = True 
-        # dict requested from dockerhub
+        	# dict requested from dockerhub
 		self.requested_data = ''  
 
 	def add_tag(self, tag_name):
@@ -579,7 +576,7 @@ organization', self.name, self.org)
 		# results: field in data holds all tag info as list of dicts
 		results = self.requested_data["results"]
 		# Search results for tag where name is same as container
-		wanted_tag = next(tag for tag in results
+		wanted_tag = next(tag for tag in results \
 			     if tag["name"] == self.container)
 		self.num_archs = len(wanted_tag["images"])
 
@@ -589,9 +586,8 @@ organization', self.name, self.org)
 		else:
 			self.is_multiarch = True
 			for arch_name in range(self.num_archs):
-				self.add_arch(wanted_tag["images"][arch_name]
-					                   ["architecture"])
-
+				self.add_arch(wanted_tag["images"][arch_name]\
+					      ["architecture"])
 				if 'ppc64le' in self.archs:
 					self.is_ppc64le = True
 				if 'amd64' in self.archs:
