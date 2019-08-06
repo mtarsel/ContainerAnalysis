@@ -60,25 +60,29 @@ def setup_logging():
 	parser = argparse.ArgumentParser(description="A script to get \
 information about images from DockerHub")
 	parser.add_argument("user", 
-			    type=argparse.FileType('r'), 
-			    help="user.yaml holds creds for Dockerhub, Github")
+						type=argparse.FileType('r'), 
+						help="user.yaml holds creds for Dockerhub, Github")
 	parser.add_argument("-d", "--debug",
-			    help="DEBUG output enabled. Logs a lot of stuff",
-			    action="store_const", dest="loglevel",
-			    const=logging.DEBUG, default=logging.WARNING)
+						help="DEBUG output enabled. Logs a lot of stuff",
+						action="store_const", dest="loglevel",
+						const=logging.DEBUG, default=logging.WARNING)
 	parser.add_argument("-v", "--verbose", 
-			    help="INFO logging enabled",
-			    action="store_const", 
-			    dest="loglevel", 
-			    const=logging.INFO)
+						help="INFO logging enabled",
+						action="store_const", 
+						dest="loglevel", 
+						const=logging.INFO)
 	parser.add_argument("-i", "--index", 
-			    help="A index.yaml file from a Helm Chart", 
-			    type=argparse.FileType('r'))
+						help="A index.yaml file from a Helm Chart", 
+						type=argparse.FileType('r'))
 	parser.add_argument("-k", "--keep", 
-			    help="Keeps old values and chart files", 
-			    action="store_true", dest="keep_files")
+						help="Keeps old values and chart files", 
+						action="store_true", dest="keep_files")
+	parser.add_argument("-l", "--local",
+						help="Skip dockerhub requests, use local data",
+						action="store_true", dest="skip_dockerhub")
 	parser.add_argument("-t", "--test", help="tests a list of specific\
  app names (1 or more input(s))", nargs='+', dest="test_names")
+
 	args = parser.parse_args()
 	logging.getLogger("requests").setLevel(logging.WARNING) 
 	# let argparse do the work for us
