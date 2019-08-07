@@ -4,9 +4,10 @@ import logging
 import urllib
 import re
 import yaml
-from os import getcwd
+from os import getcwd, path
 from json import dump, load
-from nested_lookup import nested_lookup
+
+from utils.app_utils import *
 
 class App:
 	"""This is the App Name but easier to use mainimage, subimage for 
@@ -36,42 +37,37 @@ class App:
 			self.archs.append(keyword)
 
 	def verify(self):
-		"""iterate thru an App's sub images to make sure we have all 
-		   the info we need.
-		   if something doesn't seem right, let it be known
+		""" Iterate thru an App's sub images to make sure we have all
+			the info we need.
+			If something doesn't seem right, let it be known
 		"""
 		if len(self.tags) == 0:
 			self.is_bad = True
 		if len(self.images) == 0:
 			self.is_bad = True
-		# if images != tags, just use first tag
-		# if len(self.images) != len(self.tags) or 
-		# len(self.repos) != len(self.images):
 		if len(self.repos) != len(self.images):
 			self.is_bad = True
 		for image_obj in self.sub_images:
 			if image_obj.name is None or image_obj.name == "":
 				print("gotcha in verify()")
-			# iterate thru images in app and 
-			# set the app.is_bad var based on image info		
 			if image_obj.exist_in_repo == False:
-		 		self.is_bad = True
+				self.is_bad = True
 
 	def get_product_name(self, dest_dir):
-		readme_url = self.url + "README.md"	 # base url + readme
+		readme_url = self.url + "README.md"
 		dest_loc = dest_dir + "README.md"
-		# download and return local file location
-		readme_loc = urllib.request.urlretrieve(readme_url, dest_loc)[0]
-		# open local file and find the product name
-		with open(readme_loc, 'r') as readme:
-			readme_lines = readme.readlines()  # get list of lines
+		if (not path.exists(dest_loc)):
+			# Download and save readme to local file location
+			urllib.request.urlretrieve(readme_url, dest_loc)
+		# Open local file and find the product name
+		with open(dest_loc, 'r') as readme:
+			readme_lines = readme.readlines()  # Get a list of lines
 			regex = re.compile("^# ") 
-			# make regex string looking for "# " at the 
-			# beginning of a line
-			for line in readme_lines:  # search all of the lines
+			# Make regex string looking for "# " at the beginning
+			for line in readme_lines:  # Search all of the lines
 				if (regex.search(line) != None):
 					# If the regex got a hit make product
-					# name a sanitize version of the line
+					# name a sanitized version of the line
 					self.product_name = \
 					line.replace('#', '').strip()
 					return		
@@ -81,15 +77,15 @@ from {}".format(self.name, readme_url))
 
 	def get_chart_yaml(self, dest_dir):
 		chart_yaml_url = self.url + "Chart.yaml"
-        	# base url + Chart
+		# Base url + Chart
 		dest_loc = dest_dir + "Chart.yaml"
-		# download file into applications directory
+		# Download file into applications directory
 		urllib.request.urlretrieve(chart_yaml_url, dest_loc)
 
 	def get_values_yaml(self, dest_dir):
 		values_yaml_url = self.url + "values.yaml"
 		dest_loc = dest_dir + "values.yaml"
-		# download file into applications directory
+		# Download file into applications directory
 		urllib.request.urlretrieve(values_yaml_url, dest_loc)
 
 	def parse_values_yaml(self, dir_loc):
@@ -103,44 +99,28 @@ from {}".format(self.name, readme_url))
 
 		tag_from_image = nested_lookup(key='tag', document=image_results, wild=True)
 
-		if self.name == "ibm-microclimate":
-			tag_from_image = [item for sublist in tag_from_image for item in sublist]
+		repo_from_image = nested_lookup(key='repository',
+										document=image_results, wild=True)
 
-		if self.name == "ibm-reactive-platform-lagom-sample" or self.name == "ibm-eventstreams-rhel-dev":
-			#this app contains a large list comprised of another list and a dict
-			#all the tags are the same so grab teh first value in the dict
-			for tag in tag_from_image:
-				if type(tag) is dict:
-					for k,v in tag.items():
-						tag_from_image = v
+		# These special-case apps need separate parsers (in app_utils)	
+		if (self.name == "ibm-app-navigator"):
+			tag_from_image, repo_from_image = parse_both_1(yaml_doc) 
+		elif(self.name == "ibm-object-storage-plugin"):
+			tag_from_image, repo_from_image = parse_both_2(image_results)
+		elif self.name == "ibm-microclimate":
+			tag_from_image = list(chain(*tag_from_image))
+		elif self.name == "ibm-cem":
+			tag_from_image, repo_from_image = parse_both_3(image_results)
 
-		# add the tags to app obj
-		if (len(tag_from_image) > 0):
-			if self.name == "ibm-eventstreams-dev":
-				#the first member of the list is a dict so get it
-				tag_dict = tag_from_image[0]
+		if (self.name == "ibm-reactive-platform-lagom-sample" 
+		or self.name == "ibm-eventstreams-rhel-dev"
+		or self.name == "ibm-eventstreams-dev"):
+			self.tags = parse_tags_1(tag_from_image)
+		elif (len(tag_from_image) > 0):
+			self.tags = tag_from_image
 
-				for image,tag in tag_dict.items():
-					self.tags = str(tag)
-			else:
-				self.tags = tag_from_image
-
-		repo_from_image = nested_lookup(key='repository', document=image_results, wild=True)
-
-		#ibm-ace-server-dev is getting a dict in a list as the repo_from_image
 		if self.name == "ibm-ace-server-dev":
-			#the format we get is {image: repo}
-			ace_server_dict = next(item for item in repo_from_image)
-			for image,repo in ace_server_dict.items():
-				self.images.append(str(image))
-				self.repos.append(str(repo))
-				self.clean_repos.append(str(repo))
-			if len(self.images) != len(self.tags):
-				#there is a single tag for all the images. so add more tags
-				missing_tags = len(self.images) - len(self.tags)
-				for i in range(missing_tags):
-					self.tags.append(str(self.tags[0]))
-
+			self.repos = parse_repos_1(repo_from_image)
 			return
 
 		if (len(repo_from_image) == 0):
@@ -150,10 +130,9 @@ from {}".format(self.name, readme_url))
 				if (len(repo_from_image) == 0):
 					repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
 
-		#add repos to app obj
-		logging.info('%s Num of repos: %s', self.name, str(len(repo_from_image)))
-
-		# add repos to app object
+		logging.info('%s Num of repos: %s',
+						self.name, str(len(repo_from_image)))
+		# Add repos to the app object
 		if len(repo_from_image) > 0:
 			for repo in repo_from_image:
 
@@ -393,61 +372,69 @@ from index.yaml', self.name)
 		f.write('%s,%s,N,N,N\n' %(self.product_name, self.name))
 
 	def output_CSV(self, f):
+		""" Outputs all of the information for the sub-images."""
 		# TODO maybe verify here?
 		if self.is_bad == True:
 			f.write(',,,,,Image is bad!\n')
 			return
+
+		# Get all possible combinations of those architectures
+		all_archs = ["amd64", "ppc64le", "s390x"] 
+		archs_pset = powerset(all_archs)
+
+		# Based on what subset of the powerset the image has, print
 		for image_obj in self.sub_images:
-			if image_obj.is_amd64 and image_obj.is_ppc64le and \
-			image_obj.is_s390x:
+			image_obj.archs.sort()  # Powerset is sorted too
+			if image_obj.archs == list(archs_pset[7]):
+				# ['amd64', 'ppc64le', 's390x']
 				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,Y,Y,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,,%s,%s,Y,Y,Y,N\n' % \
 					(image_obj.name, image_obj.container))
-			if image_obj.is_amd64 and image_obj.is_ppc64le \
-			and not image_obj.is_s390x:
+			elif image_obj.archs == list(archs_pset[4]):
+				# ['amd64', 'ppc64le']
 				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,Y,N,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,,%s,%s,Y,Y,N,N\n' % \
 					(image_obj.name, image_obj.container))
-			if image_obj.is_amd64 and not image_obj.is_ppc64le \
-			and image_obj.is_s390x:
+			elif image_obj.archs == list(archs_pset[5]):
+				# ['amd64', 's390x']
 				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,N,Y,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,,%s,%s,Y,N,Y,N\n' % \
 					(image_obj.name, image_obj.container))
-			if image_obj.is_amd64 and not image_obj.is_ppc64le \
-			and not image_obj.is_s390x:
+			elif image_obj.archs == list(archs_pset[1]):
+				# ['amd64']
 				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,Y,N,N,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,,%s,%s,Y,N,N,N\n' % \
 					(image_obj.name, image_obj.container))
-			if not image_obj.is_amd64 and image_obj.is_ppc64le \
-			and image_obj.is_s390x:
+			elif image_obj.archs == list(archs_pset[6]):
+				# ['ppc64le', 's390x']
 				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,N,Y,Y,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,,%s,%s,N,Y,Y,N\n' % \
 					(image_obj.name, image_obj.container))
-			if not image_obj.is_amd64 and image_obj.is_ppc64le \
-			and not image_obj.is_s390x:
+			elif image_obj.archs == list(archs_pset[2]):
+				# ['ppc64le']
 				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,N,Y,N,Y\n' % \
 					(image_obj.name, image_obj.container))
 				else:
 					f.write(',,,,,%s,%s,N,Y,N,N\n' % \
 					(image_obj.name, image_obj.container))
-			if not image_obj.is_amd64 and not image_obj.is_ppc64le\
- 			and not image_obj.is_s390x:
+			elif image_obj.archs == list(archs_pset[0]):
+				# []
 				if image_obj.is_container == True:
 					f.write(',,,,,%s,%s,N,N,N,Y\n' % \
 					(image_obj.name, image_obj.container))
@@ -508,19 +495,13 @@ class Image:
 		self.num_archs = ''
 		self.num_tags = ''
 		self.is_multiarch = False
-		self.is_ppc64le = False
-		self.is_amd64 = False
-		self.is_s390x = False
 		self.archs = []
-		self.tags = []  # now tag[1] and data[1] give all the info
+		self.tags = []  # Now tag[1] and data[1] give all the info
 		self.data = []
 		self.header = ''
-        	# if container in tags -regex * works
-		self.is_container = False
-        	# if it doesnt exist, big problem!
-		self.exist_in_repo = True 
-        	# dict requested from dockerhub
-		self.requested_data = ''  
+		self.is_container = False  # Makes sure that wanted tag exists
+		self.exist_in_repo = True
+		self.requested_data = ''  # Dict requested from dockerhub
 
 	def add_tag(self, tag_name):
 		self.tags.append(tag_name)
@@ -541,7 +522,6 @@ organization', self.name, self.org)
 			# TODO find_image(self, regis)
 			self.is_container = False
 			self.is_multiarch = False
-			self.is_ppc64le = False
 			self.num_tags = 0
 			self.exist_in_repo = False
 			return
@@ -584,10 +564,6 @@ organization', self.name, self.org)
 			for arch_name in range(self.num_archs):
 				self.add_arch(wanted_tag["images"][arch_name]\
 					      ["architecture"])
-				if 'ppc64le' in self.archs:
-					self.is_ppc64le = True
-				if 'amd64' in self.archs:
-					self.is_amd64 = True
-				if 's390x' in self.archs:
-					self.is_s390x = True
+		# Remove duplicates from list of archs
+		self.archs = list(set(self.archs))
 
