@@ -66,6 +66,10 @@ def main(args, start_time):
 			i += 1
 			print(app.name)
 	print("Total: {}".format(i))
+	print("\n==== APP ARCHS CONFLICT WITH IMAGE ARCHS ====\n")
+	for app in app_list:
+		if not app.archs_match:
+			print(app.name)
 
 
 if __name__ == "__main__":
