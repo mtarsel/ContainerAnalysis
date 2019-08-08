@@ -30,6 +30,7 @@ class App:
 		self.is_bad = False
 		self.product_name = '' #taken from README file of app
 		self.archs = []
+		self.archs_match = True
 
 	def add_keyword(self, keyword):
 		self.keywords.append(keyword)
@@ -385,6 +386,8 @@ from index.yaml', self.name)
 		# Based on what subset of the powerset the image has, print
 		for image_obj in self.sub_images:
 			image_obj.archs.sort()  # Powerset is sorted too
+			if self.archs != image_obj.archs:
+				self.archs_match = False
 			if image_obj.archs == list(archs_pset[7]):
 				# ['amd64', 'ppc64le', 's390x']
 				if image_obj.is_container == True:
