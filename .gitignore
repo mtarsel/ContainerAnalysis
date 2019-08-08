@@ -6,6 +6,7 @@ Applications/
 generated_input.yaml
 archives/
 dash-charts.json
+metrics.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
