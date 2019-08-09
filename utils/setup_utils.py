@@ -18,13 +18,13 @@ def travis_trial():
 
 
 def mkdir_p(path):
-	"""Allow us to make sub dirs, just like mkdir -p
-	This is used to move the files from the Application tarball 
-	into the permanet. Applications dir in the root of the project's 
-	dir. Why you ask? For debuggin of course!"""
+	""" Allows us to make sub dirs, just like mkdir -p .
+		Used to create subdirs like Applications and archives.
+		That makes it possible to save data between program runs.
+	"""
 	try:
 		os.makedirs(path)
-	except OSError as exc:  # Python >2.5
+	except OSError as exc:
 		if exc.errno == errno.EEXIST and os.path.isdir(path):
 			pass
 		else:
@@ -35,6 +35,12 @@ def mkdir_p(path):
 #how many items are complete, how many need to complete,
 #and the length of the bar on the screen
 def progress_bar(num, total, start_time, length=50):
+	""" Prints a progress bar as a process runs with what percent of
+		items are complete and the time the process has been running.
+		num is the number of completed items, total is the total number
+		of items to be completed, start_time is a datetime object, and
+		length is the number of octothorpes to display for the bar
+	"""
 	#get decimal and integer percent done
 	proportion = num / total
 	percent = int(proportion * 100)
@@ -43,7 +49,10 @@ def progress_bar(num, total, start_time, length=50):
 	# Get runtime to display
 	runtime = str(datetime.now() - start_time)
 	#display [###   ] NN% done
-	display = '[' + ('#' * size) + (' ' * (length - size)) + '] ' + str(percent) + '% done ' + runtime
+	display = ('[' + ('#' * size)
+					+ (' ' * (length - size))
+					+ '] ' + str(percent)
+					+ '% done ' + runtime)
 	#write with stdout to allow for in-place printing
 	sys.stdout.write(display)
 	sys.stdout.flush()
@@ -53,10 +62,11 @@ def progress_bar(num, total, start_time, length=50):
 
 
 def setup_logging():
-	"""Begin execution here.
-	Before we call main(), setup the logging from command line args """
+	""" Begin execution here.
+		Before we call main(), setup the logging from command line args
+	"""
 	parser = argparse.ArgumentParser(description="A script to get \
-information about images from DockerHub")
+						information about images from DockerHub")
 	parser.add_argument("user", 
 						type=argparse.FileType('r'), 
 						help="user.yaml holds creds for Dockerhub, Github")
@@ -78,8 +88,8 @@ information about images from DockerHub")
 	parser.add_argument("-l", "--local",
 						help="Skip dockerhub requests, use local data",
 						action="store_true", dest="skip_dockerhub")
-	parser.add_argument("-t", "--test", help="tests a list of specific\
- app names (1 or more input(s))", nargs='+', dest="test_names")
+	parser.add_argument("-t", "--test", help="tests a list of specific \
+				app names (1 or more input(s))", nargs='+', dest="test_names")
 
 	args = parser.parse_args()
 	logging.getLogger("requests").setLevel(logging.WARNING) 
@@ -116,12 +126,11 @@ def get_index_yaml(args):
 		if args.index.name == "index.yaml":
 			return str(os.getcwd() + "/" + args.index.name)
 		else:
-			print("Please only supply a index.yaml from a Helm \
-Chart. Exiting.")
-			sys.exit()
+			sys.exit("Please only supply a index.yaml from a Helm Chart.")
+
 	else:
-		url = "https://raw.githubusercontent.com/IBM/charts/master/\
-repo/stable/index.yaml"
+		url = ("https://raw.githubusercontent.com/IBM/charts/master/"
+				"repo/stable/index.yaml")
 		#gets index.yaml and returns localFileName
 		return urllib.request.urlretrieve(url)[0]	
 

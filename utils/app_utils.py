@@ -1,5 +1,7 @@
 """ parse_values_yaml() started getting messy, so here we are.
-	All of these functions are used to parse tags &&/|| repos.
+	All of these functions are used to parse tags &&/|| repos
+	or are used to useful for the app object but don't make sense
+	as an object method.
 """
 
 from nested_lookup import nested_lookup
@@ -156,3 +158,4 @@ def powerset(iterable):
 	set_list = list(iterable)
 	return list(chain.from_iterable(combinations(set_list, r)
 								for r in range(len(set_list)+1)))
+
