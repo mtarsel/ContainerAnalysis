@@ -5,10 +5,8 @@ import urllib
 import sys
 import os
 import errno
-import difflib
-from json import load
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from objects.hub import Hub
 from objects.image import App
 
@@ -166,30 +164,6 @@ def setup_output_file():
 ppc64le,s390x,Tag Exists?\n")
 	return f
 
-def diff_last_files():
-	"""Opens today's file and yesterday's, reads the lines, then
-		returns the difference between (if there is a difference)
-	"""
-	# Set up file names for today and yesterday
-	today = datetime.today().strftime("%d-%b-%Y")  # 26-Jul-2019
-	today_file_loc = "archives/results-{}.csv".format(today)
-	yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
-	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
-	# Open both files (read mode) and remove commas from every line
-	today_f_commas = open(today_file_loc, "r").readlines()
-	try:
-		yesterday_f_commas = open(yesterday_file_loc, "r").readlines()
-	except:
-		print("\nYesterday's file not found, could not diff files")
-		return "Yesterday not found"
-	today_lines = [l.replace(",", "") for l in today_f_commas]
-	yesterday_lines = [l.replace(",", "") for l in yesterday_f_commas]
-	# Print only the diff-ing lines, below progress bar
-	print("\n")
-	for line in difflib.ndiff(yesterday_lines, today_lines):
-		if(line[0] != " "):  # diff-ing lines start with non-space
-			print(line)
-	return "Finished properly"
 
 def get_dashboard_json():
 	""" Tries to return a dict from dash-charts.json, if it exists.
