@@ -1,11 +1,10 @@
-import requests
-import json
-import logging
-import urllib
-import re
-import yaml
+from requests import get
+from logging import critical, info, warning, debug
+from urllib import request
+from re import compile
+from yaml import safe_load
 from os import getcwd, path
-from json import dump, load
+from json import dump, load, loads
 
 from utils.app_utils import *
 
@@ -50,7 +49,7 @@ class App:
 			self.is_bad = True
 		for image_obj in self.sub_images:
 			if image_obj.name is None or image_obj.name == "":
-				print("gotcha in verify()")
+				print("Empty image name in ".format(self.name))
 			if image_obj.exist_in_repo == False:
 				self.is_bad = True
 
@@ -59,11 +58,11 @@ class App:
 		dest_loc = dest_dir + "README.md"
 		if (not path.exists(dest_loc)):
 			# Download and save readme to local file location
-			urllib.request.urlretrieve(readme_url, dest_loc)
+			request.urlretrieve(readme_url, dest_loc)
 		# Open local file and find the product name
 		with open(dest_loc, 'r') as readme:
 			readme_lines = readme.readlines()  # Get a list of lines
-			regex = re.compile("^# ") 
+			regex = compile("^# ") 
 			# Make regex string looking for "# " at the beginning
 			for line in readme_lines:  # Search all of the lines
 				if (regex.search(line) != None):
@@ -73,27 +72,27 @@ class App:
 					line.replace('#', '').strip()
 					return		
 		self.product_name = "NOT FOUND"
-		logging.critical("No product_name found in README for {} \
-from {}".format(self.name, readme_url))
+		critical("No product_name found in README for {} \
+					from {}".format(self.name, readme_url))
 
 	def get_chart_yaml(self, dest_dir):
 		chart_yaml_url = self.url + "Chart.yaml"
 		# Base url + Chart
 		dest_loc = dest_dir + "Chart.yaml"
 		# Download file into applications directory
-		urllib.request.urlretrieve(chart_yaml_url, dest_loc)
+		request.urlretrieve(chart_yaml_url, dest_loc)
 
 	def get_values_yaml(self, dest_dir):
 		values_yaml_url = self.url + "values.yaml"
 		dest_loc = dest_dir + "values.yaml"
 		# Download file into applications directory
-		urllib.request.urlretrieve(values_yaml_url, dest_loc)
+		request.urlretrieve(values_yaml_url, dest_loc)
 
 	def parse_values_yaml(self, dir_loc):
 		file_loc = dir_loc + "values.yaml"
 
 		with open(file_loc, 'r') as values:
-			yaml_doc = yaml.safe_load(values)
+			yaml_doc = safe_load(values)
 
 		#results from this will contain repository results
 		image_results = nested_lookup(key='image', document=yaml_doc, wild=True, with_keys=True)
@@ -131,7 +130,7 @@ from {}".format(self.name, readme_url))
 				if (len(repo_from_image) == 0):
 					repo_from_image = nested_lookup(key='Image', document=image_results, wild=True)
 
-		logging.info('%s Num of repos: %s',
+		info('%s Num of repos: %s',
 						self.name, str(len(repo_from_image)))
 		# Add repos to the app object
 		if len(repo_from_image) > 0:
@@ -162,7 +161,7 @@ from {}".format(self.name, readme_url))
 				else:
 					if '/' in str(repo):
 						#SEEMS LIKE THE BEST (ONLY) WORKING EXAMPLES. repo aint a sublist and has a slash
-						logging.info('repo: %s', repo)
+						info('repo: %s', repo)
 						self.repos.append(repo)
 					else:
 						repo = "ibmcom/" + repo
@@ -176,7 +175,7 @@ from {}".format(self.name, readme_url))
 	def parse_chart_yaml(self, dir_loc):
 		file_loc = dir_loc + "Chart.yaml"
 		with open(file_loc, 'r') as values:
-			chart_yaml_doc = yaml.safe_load(values)
+			chart_yaml_doc = safe_load(values)
 			if (len(nested_lookup('keywords', 
 					      document=chart_yaml_doc)) > 0):
 				keywords = nested_lookup('keywords', 
@@ -254,7 +253,7 @@ from {}".format(self.name, readme_url))
 			# TODO since we output CSV during crawling, 
 			# this check does not happen in testit()
 			if self.is_bad == True:
-				logging.warning('%s contains a weird image \
+				warning('%s contains a weird image \
 from index.yaml', self.name)
 				break
 			name = str(self.images[i])
@@ -271,7 +270,7 @@ from index.yaml', self.name)
 			# initialize Image object
 			image_obj = Image(name, org, container)
 			final_repo = 'hub.docker.com/' + org + '/' + container
-			logging.warning('%s: %s  %s ', 
+			warning('%s: %s  %s ', 
 					self.name, 
 					name, 
 					final_repo)
@@ -452,16 +451,15 @@ REPO,%s,N,N,N,N\n' %(image_obj.name, image_obj.container))
 N\n' % (image_obj.name, image_obj.container))
 
 	def generate_output(self):
-		"""writes to a 'yaml' file using some space and colons."""
-		logging.info('%s: Num of images: %s Num of tags: %s \
-			     Num of repos: %s', 
-			     self.name, str(len(self.images)), 
-			     str(len(self.tags)),
- 			     str(len(self.images)))
+		""" Writes to a 'yaml' file using some space and colons.
+			Only ever run when --debug enabled.
+		"""
+		info('{}: Num of images: {} Num of tags: {} Num of repos: {}'.format(
+				self.name, len(self.images), len(self.tags), len(self.images)))
+
 		with open('generated_input.yaml', 'a') as outputski:
 			if len(self.images) != len(self.tags) or \
 			len(self.repos) != len(self.images):
-				# self.is_bad = True
 				outputski.write('# ' + self.name + ':\n')
 				outputski.write('# ***ERROR SOMETHING NOT \
 				FORMATTED CORRECTLY\n')
@@ -485,16 +483,15 @@ N\n' % (image_obj.name, image_obj.container))
 
 class Image:
 	""" This is the object containing all the information we care about.
-	    Eventually all the attributes will contain everything we need
+	    Eventually all the attributes will contain everything we need.
 
-            The info we will need to query dockerhub will be from values.yaml, 
+        The info we will need to query dockerhub will be from values.yaml, 
 	    the	rest of these attributes will be from hub.docker.com
 	"""
 	def __init__(self, name, org, container):
 		self.name = name
-		self.org = org  # also called repository or repo
-		# the important container for this image
-		self.container = container 
+		self.org = org  # Also called the repository or repo
+		self.container = container  # The tag we care about			
 		self.num_archs = ''
 		self.num_tags = ''
 		self.is_multiarch = False
@@ -514,14 +511,14 @@ class Image:
 	
 	# Given a url, get all the data from it
 	def request_data(self, url):
-		r = requests.get(url, headers=self.header)  # header from hub
-		logging.debug('%s %s %s', self.name, self.org, url)
+		r = get(url, headers=self.header)  # header from hub
+		debug('%s %s %s', self.name, self.org, url)
 
 		# Image is not in this org - big problem!!!
 		if r.status_code == 404:
-			logging.critical('image: %s does not exist in %s \
-organization', self.name, self.org)
-			logging.critical(url)
+			critical('image: %s does not exist in %s organization',
+						self.name, self.org)
+			critical(url)
 			# TODO find_image(self, regis)
 			self.is_container = False
 			self.is_multiarch = False
@@ -531,20 +528,20 @@ organization', self.name, self.org)
 
 		r.raise_for_status()
 		# Turns the reply into JSON containing dict of strings
-		data = json.loads(r.text)
+		data = loads(r.text)
 		self.requested_data = data
 
 	# Uses dockerhub data to get names of tags
 	def get_image_tag_names(self):
 		if (self.num_tags == 0):  # double check to avoid failure
-			logging.critical('There is no tags for %s', self.name)
+			critical('There is no tags for %s', self.name)
 		# results: field in data holds all tag info as list of dicts
 		results = self.requested_data["results"]
 		for tag in results:
 			tag_name = tag["name"]
 			self.add_tag(tag_name)
-			logging.info('get_image_tag_names: image name: %s tag:\
- %s', self.name, self.tags[-1])
+			info('get_image_tag_names: image name: %s tag:\
+ 					%s', self.name, self.tags[-1])
 
 	# Uses dockerhub data to get archs for specific image (container)
 	def get_archs(self):
