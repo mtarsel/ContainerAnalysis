@@ -54,11 +54,19 @@ def main(args, start_time):
 		if logging.getLogger().level == logging.DEBUG:
 			app.generate_output()
 	output_f.close()
-	diff_last_files()
+	sfile = open("slackfile.txt", "w+")
+	diff_last_files(sfile)
 	print("\n==== CONFLICT WITH DASHBOARD ====\n")
+	conflict_list =[]
 	for app in app_list:
 		if not app.matches_dashboard(dash_dict):
+			conflict_list.append(app.name)
 			print(app.name)
+	if conflict_list != []:
+		sfile.write("\n==== CONFLICT WITH DASHBOARD ====\n")
+		for i in conflict_list:
+			sfile.write(i)
+	sfile.close()
 	print("\n==== BAD APPS ====\n")
 	i = 0
 	for app in app_list:
@@ -66,7 +74,12 @@ def main(args, start_time):
 			i += 1
 			print(app.name)
 	print("Total: {}".format(i))
+	print(app.matches_dashboard(dash_dict))
 
+def send_results():
+        sfile = open('slackfile.txt', "r")
+        subprocess.call('''curl -X POST -H 'Content-type: application/json' --data '{"text": " %s " }' https://hooks.slack.com/services/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'''%("Diff:\n" + sfile.read()) + "\n", shell=True)
+        sfile.close()
 
 if __name__ == "__main__":
 	start_time = datetime.now()
