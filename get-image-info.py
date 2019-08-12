@@ -1,10 +1,13 @@
 """ Written by Mick Tarsel
     Optimized by Ethan Hansen"""
 import shutil
+import csv
 
 from objects.image import Image
 from datetime import datetime
+
 from utils.setup_utils import *
+from utils.teardown_utils import *
 
 
 def main(args, start_time):
@@ -29,7 +32,6 @@ def main(args, start_time):
 		#cleanup from last run
 		shutil.rmtree(str(os.getcwd() + "/Applications"),
 			      ignore_errors=True)
-	dash_dict = get_dashboard_json()
 	num_tracker = 0
 	# for each app, get a lot of info on them
 	for app in app_list:
@@ -56,25 +58,22 @@ def main(args, start_time):
 	output_f.close()
 	sfile = open("slackfile.txt", "w+")
 	diff_last_files(sfile)
-	print("\n==== CONFLICT WITH DASHBOARD ====\n")
-	conflict_list =[]
-	for app in app_list:
-		if not app.matches_dashboard(dash_dict):
-			conflict_list.append(app.name)
-			print(app.name)
-	if conflict_list != []:
-		sfile.write("\n==== CONFLICT WITH DASHBOARD ====\n")
-		for i in conflict_list:
-			sfile.write(i)
+	dash_dict = get_dashboard_json()
+	num_xtrnl = print_external_conflict_apps(app_list, dash_dict, sfile)
+	num_bad = print_bad_apps(app_list)
+	num_ntrnl = print_internal_conflict_apps(app_list)
 	sfile.close()
-	print("\n==== BAD APPS ====\n")
-	i = 0
-	for app in app_list:
-		if app.is_bad:
-			i += 1
-			print(app.name)
-	print("Total: {}".format(i))
-	print(app.matches_dashboard(dash_dict))
+	args_enabled = [key for key,value in vars(args).items() if value is True]
+	if logging.getLogger().level == logging.DEBUG:
+		args_enabled.append("debug")
+
+	with open("metrics.csv", "a+") as metrics_csv_file:
+		metrics_writer = csv.writer(metrics_csv_file)
+		metrics_writer.writerow([datetime.now(),
+								args_enabled,
+								datetime.now()-start_time,
+								len(app_list), num_bad,
+								num_xtrnl, num_ntrnl])
 
 def send_results():
         sfile = open('slackfile.txt', "r")
