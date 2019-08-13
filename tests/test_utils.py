@@ -63,7 +63,7 @@ def test_diff_last_files_no_yesterday():
 	sfile.close()
 def test_diff_last_files_blank_yesterday():
 	# Create a blank yesterday results file, just to test
-        sfile = open("slackfile.txt","w+")
+	sfile = open("slackfile.txt","w+")
 	yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
 	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
 	yesterday_file = open(yesterday_file_loc, "w+")
