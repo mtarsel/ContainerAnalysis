@@ -58,13 +58,15 @@ def test_parse_index_yaml():
 
 # test diff_last_files from setup.utils
 def test_diff_last_files_no_yesterday():
-	assert(diff_last_files() == "Yesterday not found")
-
+	sfile = open("slackfile.txt","w+")
+	assert(diff_last_files(sfile) == "Yesterday not found")
+	sfile.close()
 def test_diff_last_files_blank_yesterday():
 	# Create a blank yesterday results file, just to test
+        sfile = open("slackfile.txt","w+")
 	yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
 	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
 	yesterday_file = open(yesterday_file_loc, "w+")
 	yesterday_file.close()
-	assert(diff_last_files() == "Finished properly")
-
+	assert(diff_last_files(sfile) == "Finished properly")
+	sfile.close()
