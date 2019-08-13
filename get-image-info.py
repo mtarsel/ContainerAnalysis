@@ -75,10 +75,6 @@ def main(args, start_time):
 								len(app_list), num_bad,
 								num_xtrnl, num_ntrnl])
 
-def send_results():
-        sfile = open('slackfile.txt', "r")
-        subprocess.call('''curl -X POST -H 'Content-type: application/json' --data '{"text": " %s " }' https://hooks.slack.com/services/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'''%("Diff:\n" + sfile.read()) + "\n", shell=True)
-        sfile.close()
 
 if __name__ == "__main__":
 	start_time = datetime.now()
