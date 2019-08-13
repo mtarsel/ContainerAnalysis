@@ -334,7 +334,6 @@ from index.yaml', self.name)
 							["architectures"]
 			archs_from_dash.sort()
 			self.archs.sort()
-			print(self.archs == archs_from_dash)
 			return self.archs == archs_from_dash
 		else:
 			return True
