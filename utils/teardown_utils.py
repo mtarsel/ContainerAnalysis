@@ -7,14 +7,20 @@ from datetime import datetime, timedelta
 import difflib
 from json import load
 
-def print_external_conflict_apps(app_list, dash_dict):
+def print_external_conflict_apps(app_list, dash_dict, sfile):
 	"""Prints out all of the app names that conflict with dashboard."""
+	conflict_list = []
 	i = 0
 	print("\n==== CONFLICT WITH DASHBOARD ====\n")
 	for app in app_list:
 		if not app.matches_dashboard(dash_dict):
+			conflict_list.append(app.name)
 			print(app.name)
 			i += 1
+	if conflict_list != []:
+                sfile.write("\n==== CONFLICT WITH DASHBOARD ====\n")
+                for i in conflict_list:
+                        sfile.write(i)
 	print("Total mismatched: {}".format(i))
 	return i
 
@@ -47,30 +53,39 @@ def print_internal_conflict_apps(app_list):
 	return i
 
 
-def diff_last_files():
-	""" Opens today's file and yesterday's, reads the lines, then
-		returns the difference between (if there is a difference)
-	"""
-	# Set up file names for today and yesterday
-	today = datetime.today().strftime("%d-%b-%Y")  # 26-Jul-2019
-	today_file_loc = "archives/results-{}.csv".format(today)
-	yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
-	yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
-	# Open both files (read mode) and remove commas from every line
-	today_f_commas = open(today_file_loc, "r").readlines()
-	try:
-		yesterday_f_commas = open(yesterday_file_loc, "r").readlines()
-	except:
-		print("\nYesterday's file not found, could not diff files")
-		return "Yesterday not found"
-	today_lines = [l.replace(",", "") for l in today_f_commas]
-	yesterday_lines = [l.replace(",", "") for l in yesterday_f_commas]
-	# Print only the diff-ing lines, below progress bar
-	print("\n")
-	for line in difflib.ndiff(yesterday_lines, today_lines):
-		if(line[0] != " "):  # diff-ing lines start with non-space
-			print(line)
-	return "Finished properly"
+def diff_last_files(sfile):
+        """Opens today's file and yesterday's, reads the lines, then
+                returns the difference between (if there is a difference)
+        """
+        # Set up file names for today and yesterday
+        slack_list = []
+        today = datetime.today().strftime("%d-%b-%Y")  # 26-Jul-2019
+        print(today)
+        today_file_loc = "archives/results-{}.csv".format(today)
+        yesterday = (datetime.today() - timedelta(1)).strftime("%d-%b-%Y")
+        yesterday_file_loc = "archives/results-{}.csv".format(yesterday)
+        # Open both files (read mode) and remove commas from every line
+        today_f_commas = open(today_file_loc, "r").readlines()
+        try:
+                yesterday_f_commas = open(yesterday_file_loc, "r").readlines()
+        except:
+                print("\nYesterday's file not found, could not diff files")
+                return "Yesterday not found"
+        today_lines = [l.replace(",", "") for l in today_f_commas]
+        yesterday_lines = [l.replace(",", "") for l in yesterday_f_commas]
+        # Print ovnly the diff-ing lines, below progress bar
+        print("\n")
+        for line in difflib.ndiff(yesterday_lines, today_lines):
+                if(line[0] != " "):  # diff-ing lines start with non-space
+                        slack_list.append(line)
+                        print(line)
+        if slack_list != []:
+                sfile.write("==== DIFF IN RESULTS ====\n")
+                for i in slack_list:
+                        sfile.write(i)
+        return "Finished properly"
+
+
 
 
 def get_dashboard_json():

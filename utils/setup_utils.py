@@ -1,4 +1,5 @@
 import logging
+import subprocess
 import argparse
 import yaml
 import urllib
@@ -174,9 +175,20 @@ ppc64le,s390x,Tag Exists?\n")
 	return f
 
 
+
+def send_results(slackfile):
+	sfile = open(slackfile, "r+")
+	slackinfo = sfile.read()
+	if slackinfo == "\n":
+		print("No diff, no apps in conflict with dashboard")
+	else:
+		subprocess.call('''curl -X POST -H 'Content-type: application/json' --data '{"text": " %s " }' https://hooks.slack.com/services/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'''%(slackinfo) + "\n", shell=True)
+	sfile.close()
+
+
 def get_dashboard_json():
 	""" Tries to return a dict from dash-charts.json, if it exists.
-		If it doesn't exist, None is returned and caught later
+	    If it doesn't exist, None is returned and caught later
 	"""
 
 	try:
