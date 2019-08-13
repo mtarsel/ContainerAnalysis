@@ -56,13 +56,13 @@ def main(args, start_time):
 		if logging.getLogger().level == logging.DEBUG:
 			app.generate_output()
 	output_f.close()
-
-	diff_last_files()
+	sfile = open("slackfile.txt", "w+")
+	diff_last_files(sfile)
 	dash_dict = get_dashboard_json()
-	num_xtrnl = print_external_conflict_apps(app_list, dash_dict)
+	num_xtrnl = print_external_conflict_apps(app_list, dash_dict, sfile)
 	num_bad = print_bad_apps(app_list)
 	num_ntrnl = print_internal_conflict_apps(app_list)
-
+	sfile.close()
 	args_enabled = [key for key,value in vars(args).items() if value is True]
 	if logging.getLogger().level == logging.DEBUG:
 		args_enabled.append("debug")
