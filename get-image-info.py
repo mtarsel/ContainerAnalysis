@@ -61,7 +61,7 @@ def main(args, start_time):
 	dash_dict = get_dashboard_json()
 	num_xtrnl = print_external_conflict_apps(app_list, dash_dict, sfile)
 	num_bad = print_bad_apps(app_list)
-	num_ntrnl = print_internal_conflict_apps(app_list)
+	num_ntrnl = print_internal_conflict_apps(app_list, sfile)
 	sfile.close()
 	args_enabled = [key for key,value in vars(args).items() if value is True]
 	if logging.getLogger().level == logging.DEBUG:
