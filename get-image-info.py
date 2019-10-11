@@ -1,5 +1,5 @@
 """ Written by Mick Tarsel
-    Optimized by Ethan Hansen"""
+	Optimized by Ethan Hansen"""
 import shutil
 import csv
 
@@ -24,14 +24,14 @@ def main(args, start_time):
 	index_yaml_loc = get_index_yaml(args)
 	# a list of Application objects
 	app_list, need_keywords_list = parse_index_yaml(index_yaml_loc,
-                                                        args.test_names) 
+														args.test_names)
 	output_f = setup_output_file()
 
 	#if we don't want to keep and use the old values.yaml
 	if ((args.keep_files or args.skip_dockerhub) is not True):
 		#cleanup from last run
 		shutil.rmtree(str(os.getcwd() + "/Applications"),
-			      ignore_errors=True)
+				  ignore_errors=True)
 	num_tracker = 0
 	# for each app, get a lot of info on them
 	for app in app_list:
@@ -44,8 +44,8 @@ def main(args, start_time):
 			# download the values.yaml file into dest_dir
 			app.get_values_yaml(dest_dir)
 		if logging.getLogger().level == logging.DEBUG or app.name\
-        	in need_keywords_list:
-		   	app.get_chart_yaml(dest_dir)
+			in need_keywords_list:
+			app.get_chart_yaml(dest_dir)
 		if app.name in need_keywords_list:
 			app.parse_chart_yaml(dest_dir)
 		app.parse_values_yaml(dest_dir)
