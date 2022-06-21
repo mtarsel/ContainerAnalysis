@@ -2,7 +2,7 @@ certifi==2019.6.16
 chardet==3.0.4
 idna==2.8
 nested-lookup==0.2.17
-numpy==1.16.4
+numpy==1.22.0
 PyYAML==5.1.1
 requests==2.22.0
 six==1.12.0
